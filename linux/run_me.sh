@@ -4,4 +4,4 @@
 ENVIRONMENT="%%{ environment }%%"
 DEPLOYMENT="%%{ deployment }%%"
 
-touch /tmp/run_me.log
+echo "${ENVIRONMENT}:${DEPLOYMENT}" > /tmp/run_me.log
