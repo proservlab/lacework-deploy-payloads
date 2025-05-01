@@ -22,15 +22,15 @@ EOH
 }
 
 errmsg(){
-echo "ERROR: ${1}"
+echo "ERROR: $${1}"
 }
 
 warnmsg(){
-echo "WARN: ${1}"
+echo "WARN: $${1}"
 }
 
 infomsg(){
-echo "INFO: ${1}"
+echo "INFO: $${1}"
 }
 
 
@@ -38,20 +38,20 @@ echo "INFO: ${1}"
 for i in "$@"; do
   case $i in
     -h|--help)
-        HELP="${i#*=}"
+        HELP="$${i#*=}"
         shift # past argument=value
         help
         ;;
     -c=*|--container=*)
-        CONTAINER="${i#*=}"
+        CONTAINER="$${i#*=}"
         shift # past argument=value
         ;;
     -s=*|--script=*)
-        SCRIPT="${i#*=}"
+        SCRIPT="$${i#*=}"
         shift # past argument=value
         ;;
     -f=*|--env-file=*)
-        ENV_FILE="${i#*=}"
+        ENV_FILE="$${i#*=}"
         shift # past argument=value
         ;;
     *)
@@ -61,12 +61,12 @@ for i in "$@"; do
 done
 
 # check for required
-if [ -z "${SCRIPT}" ]; then
+if [ -z "$${SCRIPT}" ]; then
     SCRIPT=""
 fi
 
 # setup logging
-LOGFILE=/tmp/attacker_${CONTAINER}_${SCRIPT}.sh.log
+LOGFILE=/tmp/attacker_$${CONTAINER}_$${SCRIPT}.sh.log
 function log {
     echo `date -u +"%Y-%m-%dT%H:%M:%SZ"`" $1"
     echo `date -u +"%Y-%m-%dT%H:%M:%SZ"`" $1" >> $LOGFILE
@@ -82,47 +82,47 @@ while check_apt; do
   sleep 10
 done
 
-if [ -z "${CONTAINER}" ]; then
+if [ -z "$${CONTAINER}" ]; then
     errmsg "Required option not set: --container"
     help
-elif [ "${CONTAINER}" = "protonvpn" ]; then
+elif [ "$${CONTAINER}" = "protonvpn" ]; then
     CONTAINER_IMAGE="ghcr.io/tprasadtp/protonvpn:5.2.1"
     DOCKER_OPTS="--detach --device=/dev/net/tun --cap-add=NET_ADMIN"
-elif [ "${CONTAINER}" = "torproxy" ]; then
+elif [ "$${CONTAINER}" = "torproxy" ]; then
     CONTAINER_IMAGE="dperson/torproxy"
     DOCKER_OPTS="-d --rm --name torproxy -p 9050:9050"
-elif [ "${CONTAINER}" = "scoutsuite" ]; then
+elif [ "$${CONTAINER}" = "scoutsuite" ]; then
     CONTAINER_IMAGE="rossja/ncc-scoutsuite:aws-latest"
     DOCKER_OPTS="-i --net=container:protonvpn"
     SCRIPT="scout aws -f --max-workers=1 --no-browser"
-elif [ "${CONTAINER}" = "aws-cli" ]; then
+elif [ "$${CONTAINER}" = "aws-cli" ]; then
     CONTAINER_IMAGE="amazon/aws-cli:latest"
     DOCKER_OPTS="-i --entrypoint=/bin/bash --net=container:protonvpn -w /scripts"
-elif [ "${CONTAINER}" = "terraform" ]; then
+elif [ "$${CONTAINER}" = "terraform" ]; then
     CONTAINER_IMAGE="hashicorp/terraform:latest"
-    DOCKER_OPTS="-i --entrypoint=/bin/sh --net=container:protonvpn -w /scripts/${SCRIPT}"
+    DOCKER_OPTS="-i --entrypoint=/bin/sh --net=container:protonvpn -w /scripts/$${SCRIPT}"
     SCRIPT="terraform.sh"
 fi
 
-if [ -z "${ENV_FILE}" ]; then
+if [ -z "$${ENV_FILE}" ]; then
     errmsg "Required option not set: --env-file"
-    warnmsg "Using default: ${SCRIPT_DIR}/.env"
-    ENV_FILE="${SCRIPT_DIR}/.env"
+    warnmsg "Using default: $${SCRIPT_DIR}/.env"
+    ENV_FILE="$${SCRIPT_DIR}/.env"
 fi
 
 log "Starting..."
 
 log "Removing existing containers..."
-docker stop ${CONTAINER} 2> /dev/null
-docker rm ${CONTAINER} 2> /dev/null
-docker pull ${CONTAINER_IMAGE}
+docker stop $${CONTAINER} 2> /dev/null
+docker rm $${CONTAINER} 2> /dev/null
+docker pull $${CONTAINER_IMAGE}
 
-log "Running docker command: docker run --name=${CONTAINER} ${DOCKER_OPTS} -v \"${SCRIPT_DIR}/${CONTAINER}/scripts\":/scripts --env-file=\"${ENV_FILE}\" ${CONTAINER_IMAGE} ${SCRIPT}"
+log "Running docker command: docker run --name=$${CONTAINER} $${DOCKER_OPTS} -v \"$${SCRIPT_DIR}/$${CONTAINER}/scripts\":/scripts --env-file=\"$${ENV_FILE}\" $${CONTAINER_IMAGE} $${SCRIPT}"
 docker run \
---name=${CONTAINER} \
-${DOCKER_OPTS} \
--v "${SCRIPT_DIR}/${CONTAINER}/scripts":/scripts \
---env-file="${ENV_FILE}" \
-${CONTAINER_IMAGE} ${SCRIPT}
+--name=$${CONTAINER} \
+$${DOCKER_OPTS} \
+-v "$${SCRIPT_DIR}/$${CONTAINER}/scripts":/scripts \
+--env-file="$${ENV_FILE}" \
+$${CONTAINER_IMAGE} $${SCRIPT}
 
 log "Done."

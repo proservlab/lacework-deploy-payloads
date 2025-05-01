@@ -23,12 +23,12 @@ EOH
 for i in "$@"; do
   case $i in
     -h|--help)
-        HELP="${i#*=}"
+        HELP="$${i#*=}"
         shift # past argument=value
         help
         ;;
     -p=*|--profile=*)
-        PROFILE="${i#*=}"
+        PROFILE="$${i#*=}"
         shift # past argument=value
         ;;
     *)

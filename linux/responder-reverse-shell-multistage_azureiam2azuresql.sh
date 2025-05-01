@@ -31,11 +31,11 @@ az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenan
 
 log "Authenticating service principal..."
 AUTH_RESULT=$(curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded" \
-"${IDENTITY_ENDPOINT}" \
--d "client_id=${AZURE_CLIENT_ID}" \
+"$${IDENTITY_ENDPOINT}" \
+-d "client_id=$${AZURE_CLIENT_ID}" \
 -d "grant_type=client_credentials" \
 -d "resource=https://management.azure.com/" \
--d "client_secret=${AZURE_CLIENT_SECRET}")
+-d "client_secret=$${AZURE_CLIENT_SECRET}")
 
 cat <<EOF | tee -a $LOGFILE
 AUTH_RESULT=$AUTH_RESULT
@@ -48,7 +48,7 @@ TOKEN=$TOKEN
 EOF
 
 log "Listing resource groups..."
-RESOURCE_GROUPS_RESULT=$(curl -s -X GET -H "Authorization: Bearer $TOKEN" "https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourcegroups?api-version=2021-04-01")
+RESOURCE_GROUPS_RESULT=$(curl -s -X GET -H "Authorization: Bearer $TOKEN" "https://management.azure.com/subscriptions/$${AZURE_SUBSCRIPTION_ID}/resourcegroups?api-version=2021-04-01")
 
 cat <<EOF | tee -a $LOGFILE
 RESOURCE_GROUPS_RESULT=$RESOURCE_GROUPS_RESULT
@@ -65,7 +65,7 @@ EOF
 
 log "Listing flexible mysql servers..."
 # List SQL Flexible Servers within the specified resource group (mysql) Microsoft.DBforMySQL
-MYSQL_SERVERS=$(curl -s -X GET -H "Authorization: Bearer $TOKEN" "https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.DBforMySQL/flexibleServers?api-version=2021-05-01")
+MYSQL_SERVERS=$(curl -s -X GET -H "Authorization: Bearer $TOKEN" "https://management.azure.com/subscriptions/$${AZURE_SUBSCRIPTION_ID}/resourceGroups/$${RESOURCE_GROUP_NAME}/providers/Microsoft.DBforMySQL/flexibleServers?api-version=2021-05-01")
 
 cat <<EOF | tee -a $LOGFILE
 MYSQL_SERVERS=$MYSQL_SERVERS
@@ -79,7 +79,7 @@ SERVER_NAME=$SERVER_NAME
 EOF
 
 echo "Requesting a list of backups for $SERVER_NAME..."
-BACKUPS=$(curl -s -X GET -H "Authorization: Bearer $TOKEN" "https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.DBforMySQL/flexibleServers/${SERVER_NAME}/backups?api-version=2023-10-01-preview")
+BACKUPS=$(curl -s -X GET -H "Authorization: Bearer $TOKEN" "https://management.azure.com/subscriptions/$${AZURE_SUBSCRIPTION_ID}/resourceGroups/$${RESOURCE_GROUP_NAME}/providers/Microsoft.DBforMySQL/flexibleServers/$${SERVER_NAME}/backups?api-version=2023-10-01-preview")
 
 cat <<EOF | tee -a $LOGFILE
 BACKUPS=$BACKUPS
@@ -90,8 +90,8 @@ BACKUP_NAME=$(echo $BACKUPS | jq -r '.value[-1].name')
 
 log "Creating backup..." 
 CURRENT_DATE=$(date +%Y%m%d%H%M%S)
-NEW_BACKUP_NAME="mybackup-${CURRENT_DATE}"
-RESULT=$(curl -s -D ${HEADERS_FILE} -X PUT -H "content-length: 0" -H "Authorization: Bearer $TOKEN" "https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.DBforMySQL/flexibleServers/${SERVER_NAME}/backups/${NEW_BACKUP_NAME}?api-version=2023-10-01-preview")
+NEW_BACKUP_NAME="mybackup-$${CURRENT_DATE}"
+RESULT=$(curl -s -D $${HEADERS_FILE} -X PUT -H "content-length: 0" -H "Authorization: Bearer $TOKEN" "https://management.azure.com/subscriptions/$${AZURE_SUBSCRIPTION_ID}/resourceGroups/$${RESOURCE_GROUP_NAME}/providers/Microsoft.DBforMySQL/flexibleServers/$${SERVER_NAME}/backups/$${NEW_BACKUP_NAME}?api-version=2023-10-01-preview")
 
 log "Result..."
 cat <<EOF | tee -a $LOGFILE
@@ -99,7 +99,7 @@ RESULT=$RESULT
 EOF
 
 log "Getting a list of storage accounts..."
-RESULT=$(curl -s -X GET -H "Authorization: Bearer $TOKEN" "https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/providers/Microsoft.Storage/storageAccounts?api-version=2023-05-01")
+RESULT=$(curl -s -X GET -H "Authorization: Bearer $TOKEN" "https://management.azure.com/subscriptions/$${AZURE_SUBSCRIPTION_ID}/providers/Microsoft.Storage/storageAccounts?api-version=2023-05-01")
 
 log "Result..."
 cat <<EOF | tee -a $LOGFILE
@@ -122,8 +122,8 @@ EXPIRY_TIME=$(date +'%Y-%m-%dT%H:%M:%S.0000000Z' --date='+1 hour')
 fi
 log "Setting expiry time for 1 hour: $EXPIRY_TIME"
 
-SAS_DATA="{\"canonicalizedResource\":\"/blob/${DB_BACKUP_STORAGE_ACCOUNT_NAME}/backup\",\"signedResource\":\"c\",\"signedPermission\":\"rcw\",\"signedProtocol\":\"https\",\"signedExpiry\":\"${EXPIRY_TIME}\"}"
-RESULT=$(curl -s -X POST -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" "https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Storage/storageAccounts/${DB_BACKUP_STORAGE_ACCOUNT_NAME}/listServiceSas/?api-version=2017-06-01"  -d ${SAS_DATA})
+SAS_DATA="{\"canonicalizedResource\":\"/blob/$${DB_BACKUP_STORAGE_ACCOUNT_NAME}/backup\",\"signedResource\":\"c\",\"signedPermission\":\"rcw\",\"signedProtocol\":\"https\",\"signedExpiry\":\"$${EXPIRY_TIME}\"}"
+RESULT=$(curl -s -X POST -H "Authorization: Bearer $${TOKEN}" -H "Content-Type: application/json" "https://management.azure.com/subscriptions/$${AZURE_SUBSCRIPTION_ID}/resourceGroups/$${RESOURCE_GROUP_NAME}/providers/Microsoft.Storage/storageAccounts/$${DB_BACKUP_STORAGE_ACCOUNT_NAME}/listServiceSas/?api-version=2017-06-01"  -d $${SAS_DATA})
 
 cat <<EOF | tee -a $LOGFILE
 RESULT=$RESULT
@@ -135,19 +135,19 @@ SAS_TOKEN=$SAS_TOKEN
 EOF
 
 log "Building SAS URI..."
-SAS_URI="https://${DB_BACKUP_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/backup?${SAS_TOKEN}"
+SAS_URI="https://$${DB_BACKUP_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/backup?$${SAS_TOKEN}"
 cat <<EOF | tee -a $LOGFILE
 SAS_URI=$SAS_URI
 EOF
 
 log "Building export data payload..."
-EXPORT_DATA="{\"targetDetails\":{\"objectType\":\"FullBackupStoreDetails\",\"sasUriList\":[\"${SAS_URI}\"]},\"backupSettings\":{\"backupName\":\"${NEW_BACKUP_NAME}\"}}"
+EXPORT_DATA="{\"targetDetails\":{\"objectType\":\"FullBackupStoreDetails\",\"sasUriList\":[\"$${SAS_URI}\"]},\"backupSettings\":{\"backupName\":\"$${NEW_BACKUP_NAME}\"}}"
 cat <<EOF | tee -a $LOGFILE
 EXPORT_DATA=$EXPORT_DATA
 EOF
 
 log "Requesting export..."
-RESULT=$(curl -s -D ${HEADERS_FILE} -X POST -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" "https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.DBforMySQL/flexibleServers/${SERVER_NAME}/backupAndExport?api-version=2023-10-01-preview" -d ${EXPORT_DATA})
+RESULT=$(curl -s -D $${HEADERS_FILE} -X POST -H "Authorization: Bearer $${TOKEN}" -H "Content-Type: application/json" "https://management.azure.com/subscriptions/$${AZURE_SUBSCRIPTION_ID}/resourceGroups/$${RESOURCE_GROUP_NAME}/providers/Microsoft.DBforMySQL/flexibleServers/$${SERVER_NAME}/backupAndExport?api-version=2023-10-01-preview" -d $${EXPORT_DATA})
 cat <<EOF | tee -a $LOGFILE
 RESULT=$RESULT
 EOF
@@ -155,12 +155,12 @@ EOF
 LOCATION_HEADER=$(grep -Fi Location "$HEADERS_FILE" | awk '{$1=""; print $0}' | tr -d '\r')
 
 IFS=' ' read -ra URLS <<< "$LOCATION_HEADER"
-for URL in "${URLS[@]}"; do
+for URL in "$${URLS[@]}"; do
     log "Extracted URL: $URL"
 done
 
 # Use the first URL as the operation status URL (adjust if needed)
-OPERATION_STATUS_URL=${URLS[0]}
+OPERATION_STATUS_URL=$${URLS[0]}
 
 cat <<EOF | tee -a $LOGFILE
 OPERATION_STATUS_URL=$OPERATION_STATUS_URL
@@ -171,7 +171,7 @@ log "Waiting for export to complete..."
 STATUS="InProgress"
 while [[ "$STATUS" == "InProgress" || "$STATUS" == "Queued" ]]; do
     sleep 10  # Wait for 10 seconds before polling again
-    STATUS_RESPONSE=$(curl -s -X GET -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" $(echo ${OPERATION_STATUS_URL} | sed 's/\\//g'))
+    STATUS_RESPONSE=$(curl -s -X GET -H "Authorization: Bearer $${TOKEN}" -H "Content-Type: application/json" $(echo $${OPERATION_STATUS_URL} | sed 's/\\//g'))
     cat <<EOF | tee -a $LOGFILE
 STATUS_RESPONSE=$STATUS_RESPONSE
 EOF
@@ -183,7 +183,7 @@ log "Export complete."
 
 log "Downloading backup from storage account..."
 log "Retrieving most recent logs from storage account..."
-mkdir -p /tmp/${SERVER_NAME}-dbexport
-rm -rf /tmp/${SERVER_NAME}-dbexport/*
-az storage blob download-batch --destination "/tmp/${SERVER_NAME}-dbexport" --pattern "directory/[CDI]*" --source "backup" --account-name="${DB_BACKUP_STORAGE_ACCOUNT_NAME}"
+mkdir -p /tmp/$${SERVER_NAME}-dbexport
+rm -rf /tmp/$${SERVER_NAME}-dbexport/*
+az storage blob download-batch --destination "/tmp/$${SERVER_NAME}-dbexport" --pattern "directory/[CDI]*" --source "backup" --account-name="$${DB_BACKUP_STORAGE_ACCOUNT_NAME}"
 log "Done."

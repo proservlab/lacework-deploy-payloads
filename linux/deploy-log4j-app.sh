@@ -195,8 +195,8 @@ fi
 # update java path
 log "setting up java environment for build..."
 export JAVA_HOME=/usr/java/jdk1.8.0_131/
-sudo update-alternatives --install /usr/bin/java java ${JAVA_HOME%*/}/bin/java 20000
-sudo update-alternatives --install /usr/bin/javac javac ${JAVA_HOME%*/}/bin/javac 20000
+sudo update-alternatives --install /usr/bin/java java $${JAVA_HOME%*/}/bin/java 20000
+sudo update-alternatives --install /usr/bin/javac javac $${JAVA_HOME%*/}/bin/javac 20000
     
 java -version >> $LOGFILE 2>&1
 

@@ -34,9 +34,9 @@ AWS_SESSION_TOKEN=$(curl -s http://169.254.169.254/latest/meta-data/iam/security
 # create an env file for scoutsuite
 log "Building env file for scoutsuite..."
 cat > .aws-ec2-instance <<-EOF
-AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+AWS_ACCESS_KEY_ID=$${AWS_ACCESS_KEY_ID}
+AWS_SECRET_ACCESS_KEY=$${AWS_SECRET_ACCESS_KEY}
+AWS_SESSION_TOKEN=$${AWS_SESSION_TOKEN}
 AWS_DEFAULT_REGION=us-east-1
 AWS_DEFAULT_OUTPUT=json
 EOF

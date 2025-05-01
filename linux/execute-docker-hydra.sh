@@ -192,16 +192,16 @@ dec_to_ip() {
     for e in {3..0}; do
         ((octet = dec / (256 ** e) ))
         ((dec -= octet * 256 ** e))
-        ip+="${octet}."
+        ip+="$${octet}."
     done
-    echo "${ip%?}"
+    echo "$${ip%?}"
 }
 
 # Main function to generate IP list from CIDR
 generate_ips() {
     local cidr="$1"
-    local ip="${cidr%/*}"
-    local prefix="${cidr#*/}"
+    local ip="$${cidr%/*}"
+    local prefix="$${cidr#*/}"
     local netmask=$((0xffffffff ^ ((1 << (32 - prefix)) - 1)))
 
     local start=$(ip_to_dec "$ip")

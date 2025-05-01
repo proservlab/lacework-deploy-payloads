@@ -1,3 +1,4 @@
+# variable from jinja2 template 
 $environment = "${ environment }"
 $deployment = "${ deployment }"  
 
