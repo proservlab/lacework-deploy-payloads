@@ -1,7 +1,7 @@
 # variable from jinja2 template 
 $environment = "%%{ environment }%%"
 $deployment = "%%{ deployment }%%"
-$attacker_asset_inventory = "%%{ attacker_instances }%%"
+$attacker_asset_inventory = "%%{ attacker_asset_inventory }%%"
 $target_asset_inventory = "%%{ target_asset_inventory }%%"
 
 echo "${environment}:${deployment}" > C:\\Windows\\Temp\\run_me.log
