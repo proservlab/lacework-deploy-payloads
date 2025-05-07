@@ -1,20 +1,9 @@
 # variable from jinja2 template 
-$environment = "${ environment }"
-$deployment = "${ deployment }"
-$attacker_asset_inventory = "${ attacker_asset_inventory }"
-$target_asset_inventory = "${ target_asset_inventory }"
-
-echo "${environment}:${deployment}" > C:\\Windows\\Temp\\run_me.log
+$env_context_compressed = "$env:ENV_CONTEXT"
 
 [IO.StreamReader]::new(
     [IO.Compression.GzipStream]::new(
-        [IO.MemoryStream]::new([Convert]::FromBase64String("$${attacker_asset_inventory}")),
+        [IO.MemoryStream]::new([Convert]::FromBase64String("${env_context_compressed}")),
         [IO.Compression.CompressionMode]::Decompress
     )
-).ReadToEnd() | Out-File -FilePath C:\\Windows\\Temp\\attacker_asset_inventory.log
-[IO.StreamReader]::new(
-    [IO.Compression.GzipStream]::new(
-        [IO.MemoryStream]::new([Convert]::FromBase64String("$${target_asset_inventory}")),
-        [IO.Compression.CompressionMode]::Decompress
-    )
-).ReadToEnd() | Out-File -FilePath C:\\Windows\\Temp\\target_asset_inventory.log
+).ReadToEnd() | Out-File -FilePath C:\\Windows\\Temp\\run_me.log
