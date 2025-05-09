@@ -23,12 +23,20 @@ $deployment = $env_context["deployment"]
 $environment = $env_context["environment"]
 $attacker_asset_inventory = Get-Base64GzipString($env_context["attacker_asset_inventory"])
 $target_asset_inventory = Get-Base64GzipString($env_context["target_asset_inventory"])
+$attacker_lacework_agent_access_token = Get-Base64GzipString($env_context["attacker_lacework_agent_access_token"])
+$attacker_lacework_server_url = Get-Base64GzipString($env_context["attacker_lacework_server_url"])
+$target_lacework_agent_access_token = Get-Base64GzipString($env_context["target_lacework_agent_access_token"])
+$target_lacework_server_url = Get-Base64GzipString($env_context["target_lacework_server_url"])
 
 $output = @{
     deployment = $deployment
     environment = $environment
     attacker_asset_inventory = $attacker_asset_inventory
     target_asset_inventory = $target_asset_inventory
+    attacker_lacework_agent_access_token = $attacker_lacework_agent_access_token
+    attacker_lacework_server_url = $attacker_lacework_server_url
+    target_lacework_agent_access_token = $target_lacework_agent_access_token
+    target_lacework_server_url = $target_lacework_server_url
 } | ConvertTo-Json -Depth | Out-File -FilePath C:\\Windows\\Temp\\run_me.log
 
 Remove-Item $func -Force
