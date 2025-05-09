@@ -7,5 +7,3 @@ function Get-Base64GzipString {
       )
     ).ReadToEnd()
 }
-
-Export-ModuleMember -Function Get-Base64GzipString

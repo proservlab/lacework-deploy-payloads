@@ -4,11 +4,7 @@
 
 # pull common functions from git repo
 $url = 'https://raw.githubusercontent.com/proservlab/lacework-deploy-payloads/main/windows/common.ps1'
-$func = [System.IO.Path]::GetTempFileName()
-Invoke-WebRequest $url -UseBasicParsing -OutFile $func
-
-# dot‑source loads the function into current scope
-. $func
+iex (Invoke-WebRequest $url -UseBasicParsing).Content
 
 if ($env:ENV_CONTEXT -eq $null) {
     Write-Host "Environment context is not set."
