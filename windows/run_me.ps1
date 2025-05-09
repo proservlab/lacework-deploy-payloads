@@ -1,5 +1,5 @@
 ####################################################################
-# Example script to demonstrate how to use environment context in a bash script
+# Example script to demonstrate how to use environment context in a pwsh script
 ######################################################################
 
 if ($env:ENV_CONTEXT -eq $null) {
