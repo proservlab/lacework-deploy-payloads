@@ -2,20 +2,21 @@
 # Example script to demonstrate how to use environment context in a pwsh script
 ######################################################################
 
+# pull common functions from git repo
+$url = 'https://raw.githubusercontent.com/proservlab/lacework-deploy-payloads/main/windows/common.ps1'
+$func = [System.IO.Path]::GetTempFileName()
+Invoke-WebRequest $url -UseBasicParsing -OutFile $func
+
+# dot‑source loads the function into current scope
+. $func
+
 if ($env:ENV_CONTEXT -eq $null) {
     Write-Host "Environment context is not set."
+    Remove-Item $func -Force
     exit 1
 }
 
 $env_context_compressed = "$env:ENV_CONTEXT"
-
-function Get-Base64GzipString($input) {
-    return [IO.StreamReader]::new(
-        [IO.Compression.GzipStream]::new(
-            [IO.MemoryStream]::new([Convert]::FromBase64String("${env_context_compressed}")),
-            [IO.Compression.CompressionMode]::Decompress
-        )).ReadToEnd()
-}
 
 $env_context = Get-Base64GzipString($env_context_compressed) | ConvertFrom-Json
 $deployment = $env_context["deployment"]
@@ -29,3 +30,5 @@ $output = @{
     attacker_asset_inventory = $attacker_asset_inventory
     target_asset_inventory = $target_asset_inventory
 } | ConvertTo-Json -Depth | Out-File -FilePath C:\\Windows\\Temp\\run_me.log
+
+Remove-Item $func -Force
