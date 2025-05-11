@@ -14,6 +14,7 @@ if ($env:ENV_CONTEXT -eq $null) {
 
 $env_context_compressed = "$env:ENV_CONTEXT"
 
+$tag = $env:TAG
 $env_context = Get-Base64GzipString -Base64Payload $env_context_compressed | ConvertFrom-Json
 $deployment = $env_context["deployment"]
 $environment = $env_context["environment"]
@@ -25,6 +26,7 @@ $target_lacework_agent_access_token = $env_context["target_lacework_agent_access
 $target_lacework_server_url = $env_context["target_lacework_server_url"]
 
 $output = @{
+    tag = $tag
     deployment = $deployment
     environment = $environment
     attacker_asset_inventory = $attacker_asset_inventory

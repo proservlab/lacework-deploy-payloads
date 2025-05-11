@@ -48,6 +48,11 @@ if ! command_exists "jq"; then
     fi
 fi
 
+if [ -z "$TAG" ]; then
+    echo "TAG is not set."
+fi
+
+tag=$TAG
 environment=$(echo $ENV_JSON | jq -r '.environment')
 deployment=$(echo $ENV_JSON | jq -r '.deployment')
 attacker_asset_inventory=$(get_base64gzip $(echo $ENV_JSON | jq -r '.attacker_asset_inventory'))
@@ -58,6 +63,7 @@ target_lacework_agent_access_token=$(echo $ENV_JSON | jq -r '.target_lacework_ag
 target_lacework_server_url=$(echo $ENV_JSON | jq -r '.target_lacework_server_url')
 
 cat <<EOF | tee /tmp/run_me.log
+tag: $TAG
 environment: $environment
 deployment: $deployment
 attacker_asset_inventory: $attacker_asset_inventory
