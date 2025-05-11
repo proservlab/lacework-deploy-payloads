@@ -12,7 +12,7 @@ $lockFile = "$tempDir\$scriptName.lock"
 # Functions
 ##########################################################
 
-function Write-Log-Message-Message {
+function Write-Log-Message{
     param (
         [string]$message
     )
