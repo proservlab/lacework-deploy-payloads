@@ -64,14 +64,14 @@ try {
     @{
         "env_context"                          = $env_context
         "tag"                                  = $env:TAG
-        "deployment"                           = $env_context["deployment"]
-        "environment"                          = $env_context["environment"]
-        "attacker_asset_inventory"             = Get-Base64GzipString -Base64Payload $env_context["attacker_asset_inventory"] | ConvertFrom-Json
-        "target_asset_inventory"               = Get-Base64GzipString -Base64Payload $env_context["target_asset_inventory"] | ConvertFrom-Json
-        "attacker_lacework_agent_access_token" = $env_context["attacker_lacework_agent_access_token"]
-        "attacker_lacework_server_url"         = $env_context["attacker_lacework_server_url"]
-        "target_lacework_agent_access_token"   = $env_context["target_lacework_agent_access_token"]
-        "target_lacework_server_url"           = $env_context["target_lacework_server_url"]
+        "deployment"                           = $env_context.deployment
+        "environment"                          = $env_context.environment
+        "attacker_asset_inventory"             = Get-Base64GzipString -Base64Payload $env_context.attacker_asset_inventory | ConvertFrom-Json
+        "target_asset_inventory"               = Get-Base64GzipString -Base64Payload $env_context.target_asset_inventory | ConvertFrom-Json
+        "attacker_lacework_agent_access_token" = $env_context.attacker_lacework_agent_access_token
+        "attacker_lacework_server_url"         = $env_context.attacker_lacework_server_url
+        "target_lacework_agent_access_token"   = $env_context.target_lacework_agent_access_token
+        "target_lacework_server_url"           = $env_context.target_lacework_server_url
     } | ConvertTo-Json -Compress | Out-File -FilePath $env:TEMP\\run_me.log
     Write-Log-Message "Payload built and logged to $env:TEMP\\run_me.log"
 }
