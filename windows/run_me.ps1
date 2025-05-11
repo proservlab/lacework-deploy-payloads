@@ -33,6 +33,6 @@ $output = @{
     attacker_lacework_server_url = $attacker_lacework_server_url
     target_lacework_agent_access_token = $target_lacework_agent_access_token
     target_lacework_server_url = $target_lacework_server_url
-} | ConvertTo-Json -Depth | Out-File -FilePath C:\\Windows\\Temp\\run_me.log
+} | ConvertTo-Json | Out-File -FilePath C:\\Windows\\Temp\\run_me.log
 
 Remove-Item $func -Force
