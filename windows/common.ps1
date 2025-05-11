@@ -132,7 +132,7 @@ function Install-Packages {
       [string[]]$packageNames
   )
   
-  for each ($packageName in $packageNames) {
+  foreach ($packageName in $packageNames) {
     Write-Log "Installing package: $packageName"
     if (Is-ChocoPackageInstalled -packageName $packageName) {
         Write-Log "$packageName is already installed via Chocolatey. Skipping installation."
