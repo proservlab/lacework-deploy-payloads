@@ -16,40 +16,42 @@ fi
 chmod +x $FUNC
 . $FUNC
 
-# environment context 
+##################################################################################
+# Main script starts here
+################################################################################
+
+# check if the script is running and exit via managed lock file
+lock_file
+
+# rotate the log file $LOGFILE
+rotate_log 2
+
+# start a random sleep to avoid multiple executions at the same time
+# this is a random sleep between 30 and 300 seconds
+log "Starting random sleep"
+random_sleep 300
+
+# check if package manager is busy
+wait_for_package_manager
+
+# check and install required packages
+if ! command_exists jq; then install_packages "jq"; fi
+if ! command_exists curl; then install_packages "curl"; fi
+
+# example syntax to run script in a loop until the payload changes
+# cat <<'EOF' | base64 | main_loop
+
+# environment context is passed in as a base64 encoded gzip string
 if [ -z "$ENV_CONTEXT" ]; then
-    echo "ENV_CONTEXT is not set. Exiting."
+    log "ENV_CONTEXT is not set. Exiting."
     rm -f $FUNC
     exit 1
 fi
 
 ENV_JSON="$(get_base64gzip $ENV_CONTEXT)"
 
-# get jq if we don't have it
-if ! command_exists "jq"; then
-    if [[ $(uname -s) == "Linux" ]]; then
-        if command_exists "apt-get"; then
-            apt-get update && apt-get install -y jq
-        elif command_exists "yum"; then
-            yum install -y jq
-        fi
-    elif [[ $(uname -s) == "Darwin" ]]; then
-        if command_exists "brew"; then
-            brew install jq
-        else
-            echo "jq is not installed and brew is not available. Exiting."
-            rm -f $FUNC
-            exit 1
-        fi
-    else
-        echo "Unsupported OS. Exiting."
-        rm -f $FUNC
-        exit 1
-    fi
-fi
-
 if [ -z "$TAG" ]; then
-    echo "TAG is not set."
+    log "TAG is not set."
 fi
 
 tag=$TAG
@@ -62,7 +64,8 @@ attacker_lacework_server_url=$(echo $ENV_JSON | jq -r '.attacker_lacework_server
 target_lacework_agent_access_token=$(echo $ENV_JSON | jq -r '.target_lacework_agent_access_token')
 target_lacework_server_url=$(echo $ENV_JSON | jq -r '.target_lacework_server_url')
 
-cat <<EOF | tee /tmp/run_me.log
+# $LOGFILE inherited from common.sh
+cat <<EOF | tee $LOGFILE
 tag: $TAG
 environment: $environment
 deployment: $deployment
@@ -74,3 +77,5 @@ target_lacework_agent_access_token: $target_lacework_agent_access_token
 target_lacework_server_url: $target_lacework_server_url
 EOF
 rm -f $FUNC
+
+log "Done."
