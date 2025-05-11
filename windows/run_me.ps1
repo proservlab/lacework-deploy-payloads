@@ -7,7 +7,7 @@ $url = 'https://raw.githubusercontent.com/proservlab/lacework-deploy-payloads/ma
 iex (Invoke-WebRequest $url -UseBasicParsing).Content
 
 if ($env:ENV_CONTEXT -eq $null) {
-    Write-Host "Environment context is not set."
+    Write-Output "Environment context is not set."
     Remove-Item $func -Force
     exit 1
 }
@@ -25,6 +25,9 @@ $attacker_lacework_server_url = $env_context["attacker_lacework_server_url"]
 $target_lacework_agent_access_token = $env_context["target_lacework_agent_access_token"]
 $target_lacework_server_url = $env_context["target_lacework_server_url"]
 
+Write-Output "Env Context: $(Get-Base64GzipString -Base64Payload $env_context_compressed)"
+Write-Output "Tag: $tag"
+
 $output = @{
     tag = $tag
     deployment = $deployment
@@ -35,6 +38,6 @@ $output = @{
     attacker_lacework_server_url = $attacker_lacework_server_url
     target_lacework_agent_access_token = $target_lacework_agent_access_token
     target_lacework_server_url = $target_lacework_server_url
-} | ConvertTo-Json | Out-File -FilePath C:\\Windows\\Temp\\run_me.log
+} | ConvertTo-Json -Compress | Out-File -FilePath C:\\Windows\\Temp\\run_me.log
 
 Remove-Item $func -Force
