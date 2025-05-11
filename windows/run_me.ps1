@@ -6,17 +6,17 @@
 $url = 'https://raw.githubusercontent.com/proservlab/lacework-deploy-payloads/main/windows/common.ps1'
 Invoke-Expression (Invoke-WebRequest $url -UseBasicParsing).Content
 
-if ($null -eq $env:ENV_CONTEXT) {
-    Write-Output "Environment context is not set."
-    Remove-Item $func -Force
-    exit 1
-}
-
 ##################################################################
 # Main Script
 ##################################################################
 
 try {
+    
+    if ($null -eq $env:ENV_CONTEXT) {
+        Write-Output "Environment context is not set."
+        exit 1
+    }
+
     $preTasks = @()
     $packages = @()  # e.g. "git"
     $services = @()
@@ -79,7 +79,6 @@ catch {
     Write-Log-Message "Error: $_"
 }
 finally {
-    Remove-Item $func -Force
     Cleanup
     Write-Log-Message "Done"
 }

@@ -68,7 +68,7 @@ function Rotate-Log {
 }
 
 function Cleanup {
-    Remove-Item -Path $lockFile -ErrorAction Ignore
+    Remove-Item -Path $lockFile -ErrorAction SilentlyContinue
 }
 
 # Check for Chocolatey Installation
