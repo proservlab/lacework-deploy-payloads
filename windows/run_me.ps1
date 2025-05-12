@@ -58,16 +58,16 @@ try {
     #################################################################
 
     $env_context_compressed = "$env:ENV_CONTEXT"
-    $env_context = Get-Base64GzipString -Base64Payload $env_context_compressed | ConvertFrom-Json -Depth 10
-    Write-Log-Message "Environment context: $($env_context | ConvertTo-Json -Compress -Depth 10)"
+    $env_context = Get-Base64GzipString -Base64Payload $env_context_compressed | ConvertFrom-Json
+    Write-Log-Message "Environment context: $($env_context | ConvertTo-Json -Compress)"
     Write-Log-Message "Building full payload..."
     @{
         "env_context"                          = $env_context
         "tag"                                  = $env:TAG
         "deployment"                           = $env_context.deployment
         "environment"                          = $env_context.environment
-        "attacker_asset_inventory"             = Get-Base64GzipString -Base64Payload $env_context.attacker_asset_inventory | ConvertFrom-Json -Depth 10
-        "target_asset_inventory"               = Get-Base64GzipString -Base64Payload $env_context.target_asset_inventory | ConvertFrom-Json -Depth 10
+        "attacker_asset_inventory"             = Get-Base64GzipString -Base64Payload $env_context.attacker_asset_inventory | ConvertFrom-Json
+        "target_asset_inventory"               = Get-Base64GzipString -Base64Payload $env_context.target_asset_inventory | ConvertFrom-Json
         "attacker_lacework_agent_access_token" = $env_context.attacker_lacework_agent_access_token
         "attacker_lacework_server_url"         = $env_context.attacker_lacework_server_url
         "target_lacework_agent_access_token"   = $env_context.target_lacework_agent_access_token
