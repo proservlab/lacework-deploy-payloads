@@ -14,7 +14,7 @@ Invoke-Expression (Invoke-WebRequest $url -UseBasicParsing).Content
 try {
 
     <#  Upgrade Windows PowerShell 5.x to PowerShell 7.x  (cloud‑friendly) #>
-    param([string]$TargetVersion='', [switch]$Force)
+    $TargetVersion=''
 
     $logRoot = "$env:SystemDrive\InstallLogs"; mkdir $logRoot -ea 0 | out-null
     Write-Log-Message "Starting installation transcript: $logRoot\pwsh-upgrade_{0:yyyyMMdd_HHmmss}.log"
@@ -22,7 +22,7 @@ try {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
     $existing = Get-Command pwsh.exe -EA SilentlyContinue
-    if ($existing -and -not $Force) { Write-Log-Message "PowerShell 7 already present"; Stop-Transcript; return }
+    if ($existing) { Write-Log-Message "PowerShell 7 already present"; Stop-Transcript; return }
 
     $arch = if ([Environment]::Is64BitOperatingSystem) { 'x64' } else { 'x86' }
     if (-not $TargetVersion) {
