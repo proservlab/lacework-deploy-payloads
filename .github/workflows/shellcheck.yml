@@ -1,0 +1,101 @@
+name: Lint scripts (ShellCheck + PSScriptAnalyzer)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ────────────────────────────────
+      # 1. Check out the code
+      # ────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ────────────────────────────────
+      # 2. Install prerequisites
+      # ────────────────────────────────
+      - name: Install tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install jq shellcheck  # jq for JSON filtering; shellcheck from apt
+
+      # ────────────────────────────────
+      # 3. Run ShellCheck on Bash scripts
+      # ────────────────────────────────
+      - name: ShellCheck (fail on errors only)
+        id: shellcheck
+        run: |
+          # Find every *.sh under ./linux (handles nested folders)
+          mapfile -t SCRIPTS < <(find ./linux -type f -name "*.sh")
+          if [[ ${#SCRIPTS[@]} -eq 0 ]]; then
+            echo "No Bash scripts found under ./linux — skipping ShellCheck."
+            echo '{}' > shellcheck.json
+            exit 0
+          fi
+
+          # Run ShellCheck –JSON output → file
+          shellcheck -S error "${SCRIPTS[@]}" -f json | tee sc_raw.json
+          # Filter for "error" findings only
+          ERRORS=$(jq '[.[] | select(.level=="error")] | length' sc_raw.json)
+
+          mv sc_raw.json shellcheck.json
+
+          if [[ $ERRORS -gt 0 ]]; then
+            echo "ShellCheck result: **FAILED** ($ERRORS errors)"
+            exit 1
+          else
+            echo "ShellCheck result: SUCCESS (no errors)"
+          fi
+
+      # ────────────────────────────────
+      # 4. Run PSScriptAnalyzer on PowerShell scripts
+      # ────────────────────────────────
+      - name: PSScriptAnalyzer (fail on errors only)
+        id: psa
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+
+          # Install the analyzer module (already cached on runners, but safe to force)
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser | Out-Null
+
+          # Collect .ps1 files under ./windows (recursive)
+          $scripts = Get-ChildItem -Path ./windows -Recurse -Filter *.ps1
+          if (-not $scripts) {
+              Write-Host "No PowerShell scripts found under ./windows — skipping Invoke-ScriptAnalyzer."
+              '{}' | Out-File -FilePath scriptanalyzer.json -Encoding utf8
+              return
+          }
+
+          # Run analyzer, only return Severity=Error
+          $results = Invoke-ScriptAnalyzer -Path $scripts.FullName -Severity Error
+          $results | ConvertTo-Json -Depth 10 | Out-File -FilePath scriptanalyzer.json -Encoding utf8
+
+          if ($results.Count -gt 0) {
+              Write-Error "Invoke‑ScriptAnalyzer found $($results.Count) error(s)."
+              exit 1
+          } else {
+              Write-Host "Invoke‑ScriptAnalyzer result: SUCCESS (no errors)."
+          }
+
+      # ────────────────────────────────
+      # 5. Upload artifacts (keep for 3 days)
+      # ────────────────────────────────
+      - name: Upload ShellCheck results
+        uses: actions/upload-artifact@v4
+        with:
+          name: shellcheck-json
+          path: shellcheck.json
+          retention-days: 3
+
+      - name: Upload PSScriptAnalyzer results
+        uses: actions/upload-artifact@v4
+        with:
+          name: scriptanalyzer-json
+          path: scriptanalyzer.json
+          retention-days: 3
