@@ -64,7 +64,7 @@ This directory contains Bash scripts that can be executed on Linux instances via
 ## RDP and Responder Scripts
 - **rdp_brute.sh**: Perform RDP brute-force attacks.
 - **responder-port-forward.sh**: Use Responder to forward SMB/NTLM traffic.
-- **responder-reverse-shell*.sh**: Reverse shell scenarios using Responder (multistage variants).
+- **responder-reverse-shell.sh**: Reverse shell scenarios using Responder (multistage variants).
 
 ## Orchestration
 - **run_me.sh**: Orchestrator to execute a sequence of payloads based on the `TAG`.
