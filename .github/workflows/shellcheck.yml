@@ -83,9 +83,60 @@ jobs:
               Write-Host "Invoke‑ScriptAnalyzer result: SUCCESS (no errors)."
           }
 
+
       # ────────────────────────────────
-      # 5. Upload artifacts (keep for 3 days)
+      # 4 A.  Ensure every Linux script is in linux/README.md
       # ────────────────────────────────
+      - name: Check linux README coverage
+        id: linux_readme
+        run: |
+          set -eo pipefail
+          missing=()
+          while IFS= read -r -d '' f; do
+            base=$(basename "$f")
+            if ! grep -qF "$base" ./linux/README.md; then
+              missing+=("$base")
+            fi
+          done < <(find ./linux -type f -name '*.sh' -print0)
+
+          if (( ${#missing[@]} )); then
+            printf '%s\n' "${missing[@]}" | jq -R . | jq -s '{missing:$ARGS.positional}' > linux_readme_missing.json
+            echo "::error::The following Linux scripts are not documented in linux/README.md: ${missing[*]}"
+            exit 1
+          else
+            echo '{}' > linux_readme_missing.json
+            echo "All Linux scripts are documented in linux/README.md"
+          fi
+
+      # ────────────────────────────────
+      # 4 B.  Ensure every Windows script is in windows/README.md
+      # ────────────────────────────────
+      - name: Check windows README coverage
+        id: win_readme
+        shell: bash
+        run: |
+          set -eo pipefail
+          missing=()
+          while IFS= read -r -d '' f; do
+            base=$(basename "$f")
+            if ! grep -qF "$base" ./windows/README.md; then
+              missing+=("$base")
+            fi
+          done < <(find ./windows -type f -name '*.ps1' -print0)
+
+          if (( ${#missing[@]} )); then
+            printf '%s\n' "${missing[@]}" | jq -R . | jq -s '{missing:$ARGS.positional}' > windows_readme_missing.json
+            echo "::error::The following Windows scripts are not documented in windows/README.md: ${missing[*]}"
+            exit 1
+          else
+            echo '{}' > windows_readme_missing.json
+            echo "All Windows scripts are documented in windows/README.md"
+          fi
+
+      # ────────────────────────────────
+      # 5.  Upload artifacts (ShellCheck, PSSA, README reports)
+      # ────────────────────────────────
+      
       - name: Upload ShellCheck results
         uses: actions/upload-artifact@v4
         with:
@@ -99,3 +150,14 @@ jobs:
           name: scriptanalyzer-json
           path: scriptanalyzer.json
           retention-days: 3
+
+      - name: Upload README coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: readme-coverage-json
+          path: |
+            linux_readme_missing.json
+            windows_readme_missing.json
+          retention-days: 3
+
+    
