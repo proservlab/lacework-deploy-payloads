@@ -72,8 +72,8 @@ try {
         "attacker_lacework_server_url"         = $env_context.attacker_lacework_server_url
         "target_lacework_agent_access_token"   = $env_context.target_lacework_agent_access_token
         "target_lacework_server_url"           = $env_context.target_lacework_server_url
-    } | ConvertTo-Json -Compress | Out-File -FilePath $env:TEMP\\run_me_env_context.log
-    Write-LogMessage "Payload built and logged to $env:TEMP\\run_me.log"
+    } | ConvertTo-Json -Compress | Out-File -FilePath C:\\Windows\\Temp\\run_me_env_context.log
+    Write-LogMessage "Payload built and logged to C:\\Windows\\Temp\\run_me_env_context.log"
 }
 catch {
     Write-LogMessage "Error: $_"
