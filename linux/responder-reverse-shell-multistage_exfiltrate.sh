@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # disable pager
 export AWS_PAGER=""
 
