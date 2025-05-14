@@ -57,15 +57,6 @@ This directory contains Bash scripts that can be executed on Linux instances via
 - **execute-generate-gcp-cli-traffic.sh**: Generate simulated GCP CLI traffic.
 - **execute-generate-web-traffic.sh**: Generate simulated web traffic.
 
-## Composite Scenarios (Docker)
-- **execute-docker-composite-cloud-cryptomining*.sh**: Multi-stage cloud cryptomining attack variants (`auto-free`, `auto-paid`, `baseline`, `cloudransom`, `discovery`, `evasion`, `start`, `terraform`).
-- **execute-docker-composite-cloud-ransomware*.sh**: Multi-stage cloud ransomware attack variants.
-- **execute-docker-composite-compromised-credentials*.sh**: Multi-stage compromised credential attack variants.
-- **execute-docker-composite-defense-evasion*.sh**: Multi-stage defense evasion attack variants.
-- **execute-docker-composite-guardduty*.sh**: AWS GuardDuty detection and evasion scenarios (`discovery`, `start`).
-- **execute-docker-composite-host-compromise*.sh**: Host compromise attack scripts (`attack_script`, `start_script`).
-- **execute-docker-composite-host-cryptomining*.sh**: Host cryptomining attack variants.
-
 ## Listener Scripts
 - **listener-http-listener.sh**: Start an HTTP server to catch callbacks.
 - **listener-port-forward.sh**: Forward local ports to remote hosts.
