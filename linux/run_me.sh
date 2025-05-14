@@ -4,8 +4,6 @@
 ######################################################################
 
 URL="https://raw.githubusercontent.com/proservlab/lacework-deploy-payloads/main/linux/common.sh"
-if ! command -v mktemp >/dev/null 2>&1; then echo "curl is not installed. Exiting."; exit 1; fi
-if ! command -v curl >/dev/null 2>&1; then echo "curl is not installed. Exiting."; exit 1; fi
 FUNC=$(mktemp)
 curl -LJ -s $URL -o $FUNC
 # make the function available in the current shell
