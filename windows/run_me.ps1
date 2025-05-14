@@ -22,9 +22,6 @@ try {
     $services = @()
     $postTasks = @()
 
-    Log-RotationCount = 2
-    Rotate-Log -LogRotationCount $Log-RotationCount
-
     Write-LogMessage "Starting..."
 
     Write-LogMessage "Checking for Chocolatey package manager..."
@@ -53,7 +50,7 @@ try {
 
     # Execute Post-tasks
     Write-LogMessage "Starting post-tasks..."
-    PostInstall-CommandList $postTasks
+    Invoke-CommandList $postTasks
     Write-LogMessage "Post-tasks complete."
 
     #################################################################
