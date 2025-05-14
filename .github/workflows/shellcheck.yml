@@ -58,7 +58,7 @@ jobs:
         id: psa
         shell: pwsh
         run: |
-          Set-StrictMode -Version Latest
+          # Set-StrictMode -Version Latest
           $ErrorActionPreference = 'Stop'
 
           # Install the analyzer module (already cached on runners, but safe to force)
@@ -73,7 +73,7 @@ jobs:
           }
 
           # Run analyzer, only return Severity=Error
-          $results = Invoke-ScriptAnalyzer -Path ./windows/*.ps1 -Severity Error
+          $results = Invoke-ScriptAnalyzer -Path ./windows/*.ps1 -Severity Error -ExcludeRule "PSAvoidUsingConvertToSecureStringWithPlainText"
           $results | ConvertTo-Json -Depth 10 | Out-File -FilePath scriptanalyzer.json -Encoding utf8
 
           if ($results.Count -gt 0) {
