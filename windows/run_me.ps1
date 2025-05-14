@@ -11,7 +11,7 @@ Invoke-Expression (Invoke-WebRequest $url -UseBasicParsing).Content
 ##################################################################
 
 try {
-    
+
     if ($null -eq $env:ENV_CONTEXT) {
         Write-Output "Environment context is not set."
         exit 1
@@ -22,36 +22,39 @@ try {
     $services = @()
     $postTasks = @()
 
-    Write-Log-Message "Starting..."
+    Log-RotationCount = 2
+    Rotate-Log -LogRotationCount $Log-RotationCount
 
-    Write-Log-Message "Checking for Chocolatey package manager..."
-    Install-ChocolateyIfNeeded
+    Write-LogMessage "Starting..."
+
+    Write-LogMessage "Checking for Chocolatey package manager..."
+    Install-Chocolatey
 
     # Retry Mechanism if Chocolatey is Busy
-    Wait-ForPackageManager
+    Wait-PackageManager
 
     # Randomized Delay before starting
-    Random-Sleep 30 300
+    Invoke-RandomSleep 30 300
 
     # Execute Pre-tasks
-    Write-Log-Message "Starting pre-tasks..."
-    PreInstall-Commands $preTasks
-    Write-Log-Message "Pre-tasks complete."
+    Write-LogMessage "Starting pre-tasks..."
+    Invoke-CommandList $preTasks
+    Write-LogMessage "Pre-tasks complete."
 
     # Install Chocolatey Packages (for example, Git and Docker Desktop)
-    Write-Log-Message "Starting package installation..."
-    Install-Packages -packageNames $packages
-    Write-Log-Message "Package installation complete."
+    Write-LogMessage "Starting package installation..."
+    Install-ChocoPackage -packageNames $packages
+    Write-LogMessage "Package installation complete."
 
     # Start services (for example com.docker.service)
-    Write-Log-Message "Starting services..."
-    Start-Services -serviceNames $services
-    Write-Log-Message "Service start complete."
+    Write-LogMessage "Starting services..."
+    Start-ServiceList -serviceNames $services
+    Write-LogMessage "Service start complete."
 
     # Execute Post-tasks
-    Write-Log-Message "Starting post-tasks..."
-    PostInstall-Commands $postTasks
-    Write-Log-Message "Post-tasks complete."
+    Write-LogMessage "Starting post-tasks..."
+    PostInstall-CommandList $postTasks
+    Write-LogMessage "Post-tasks complete."
 
     #################################################################
     # Main script logic goes here
@@ -59,8 +62,8 @@ try {
 
     $env_context_compressed = "$env:ENV_CONTEXT"
     $env_context = Get-Base64GzipString -Base64Payload $env_context_compressed | ConvertFrom-Json
-    Write-Log-Message "Environment context: $($env_context | ConvertTo-Json -Compress)"
-    Write-Log-Message "Building full payload..."
+    Write-LogMessage "Environment context: $($env_context | ConvertTo-Json -Compress)"
+    Write-LogMessage "Building full payload..."
     @{
         "env_context"                          = $env_context
         "tag"                                  = $env:TAG
@@ -73,12 +76,12 @@ try {
         "target_lacework_agent_access_token"   = $env_context.target_lacework_agent_access_token
         "target_lacework_server_url"           = $env_context.target_lacework_server_url
     } | ConvertTo-Json -Compress | Out-File -FilePath $env:TEMP\\run_me_env_context.log
-    Write-Log-Message "Payload built and logged to $env:TEMP\\run_me.log"
+    Write-LogMessage "Payload built and logged to $env:TEMP\\run_me.log"
 }
 catch {
-    Write-Log-Message "Error: $_"
+    Write-LogMessage "Error: $_"
 }
 finally {
-    Cleanup
-    Write-Log-Message "Done"
+    Invoke-Cleanup
+    Write-LogMessage "Done"
 }

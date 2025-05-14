@@ -2,6 +2,10 @@
 
 export LOGFILE="/tmp/lacework_deploy_$TAG.log"
 
+if [ -z $MAXLOG ]; then
+    MAXLOG=2
+fi
+
 # Determine Package Manager
 if command_exists "apt-get"; then
     export PACKAGE_MANAGER="apt-get"
@@ -169,5 +173,8 @@ postinstall_cmd() {
 
 trap cleanup EXIT INT TERM
 trap cleanup SIGINT
+
+rotate_log $MAXLOG
+lockfile
 
 export -f get_base64gzip random_sleep command_exists rotate_log cleanup lockfile log check_payload_update check_package_manager

@@ -12,7 +12,7 @@ $lockFile = "$tempDir\$scriptName.lock"
 # Functions
 ##########################################################
 
-function Write-Log-Message{
+function Write-LogMessage {
     param (
         [string]$message
     )
@@ -20,13 +20,13 @@ function Write-Log-Message{
     Write-Output "$timestamp $message" | Tee-Object -Append -FilePath $logFile
 }
 
-function Random-Sleep {
+function Invoke-RandomSleep {
     param(
         [int]$min = 30,
         [int]$max = 300
     )
     $sleepTime = Get-Random -Minimum $min -Maximum $max
-    Write-Log-Message "Sleeping for $sleepTime seconds..."
+    Write-LogMessage "Sleeping for $sleepTime seconds..."
     Start-Sleep -Seconds $sleepTime
 }
 
@@ -43,7 +43,7 @@ function Get-Base64GzipString {
     ).ReadToEnd()
 }
 
-function Lock-File {
+function New-LockFile {
     if (Test-Path $lockFile) {
         Write-Output "Another instance is already running. Exiting..."
         exit 1
@@ -53,7 +53,7 @@ function Lock-File {
     }
 }
 
-function Rotate-Log {
+function Invoke-LogRotation {
     param(
         [int]$LogRotationCount = 2
     )
@@ -67,13 +67,13 @@ function Rotate-Log {
     }
 }
 
-function Cleanup {
+function Invoke-Cleanup {
     Remove-Item -Path $lockFile -ErrorAction SilentlyContinue
 }
 
 # Check for Chocolatey Installation
-function Install-ChocolateyIfNeeded {
-    Write-Log-Message "Ensuring Chocolatey commands are on the path"
+function Install-Chocolatey {
+    Write-LogMessage "Ensuring Chocolatey commands are on the path"
     $chocoInstallVariableName = "ChocolateyInstall"
     $chocoPath = [Environment]::GetEnvironmentVariable($chocoInstallVariableName)
 
@@ -94,7 +94,7 @@ function Install-ChocolateyIfNeeded {
 
     # Check if Chocolatey is installed; if not, install it.
     if (-not (Get-Command choco.exe -ErrorAction SilentlyContinue)) {
-        Write-Log-Message "Chocolatey is not installed. Installing Chocolatey..."
+        Write-LogMessage "Chocolatey is not installed. Installing Chocolatey..."
         # Set execution policy to allow the script to run
         Set-ExecutionPolicy Bypass -Scope Process -Force
         # Ensure TLS 1.2 (or better) is used
@@ -103,24 +103,24 @@ function Install-ChocolateyIfNeeded {
         Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
     }
     else {
-        Write-Log-Message "Chocolatey is already installed."
+        Write-LogMessage "Chocolatey is already installed."
     }
 }
 
 # Check if Chocolatey or msiexec.exe is Running
-function Check-ChocolateyInUse {
+function Test-ChocoInUse {
     return $null -ne (Get-Process | Where-Object { $_.Name -match "choco|msiexec" })
 }
 
-function Is-Command-Available {
+function Test-CommandAvailability {
     param(
         [string]$command
     )
     $result = Get-Command $command -ErrorAction SilentlyContinue
-    return $result -ne $null
+    return $null -ne $result
 }
 
-function Is-ChocoPackageInstalled {
+function Test-ChocoPackageInstalled {
     param(
         [string]$packageName
     )
@@ -129,69 +129,69 @@ function Is-ChocoPackageInstalled {
 }
 
 # Install Package Function for Git and Docker
-function Install-Packages {
+function Install-ChocoPackage {
     param(
         [string[]]$packageNames
     )
-  
+
     foreach ($packageName in $packageNames) {
-        Write-Log-Message "Installing package: $packageName"
-        if (Is-ChocoPackageInstalled -packageName $packageName) {
-            Write-Log-Message "$packageName is already installed via Chocolatey. Skipping installation."
+        Write-LogMessage "Installing package: $packageName"
+        if (Test-ChocoPackageInstalled -packageName $packageName) {
+            Write-LogMessage "$packageName is already installed via Chocolatey. Skipping installation."
             return
         }
         else {
-            Write-Log-Message "$packageName is not installed. Installing $packageName..."
+            Write-LogMessage "$packageName is not installed. Installing $packageName..."
             Invoke-Expression "choco install $packageName -y"
             if (Get-PendingReboot) {
-                Write-Log-Message "A pending reboot was detected. Rebooting now..."
+                Write-LogMessage "A pending reboot was detected. Rebooting now..."
                 Restart-Computer -Force
             }
             else {
-                Write-Log-Message "No pending reboot detected."
+                Write-LogMessage "No pending reboot detected."
             }
         }
     }
 }
 
-function Start-Services {
+function Start-ServiceList {
     param(
         [string[]]$serviceName
     )
     foreach ($serviceName in $serviceNames) {
-        Write-Log-Message "Starting service: $serviceName"
+        Write-LogMessage "Starting service: $serviceName"
         Start-Service -Name $serviceName
     }
 }
 
-function Stop-Services {
+function Stop-ServiceList {
     param(
         [string[]]$serviceName
     )
     foreach ($serviceName in $serviceNames) {
-        Write-Log-Message "Starting service: $serviceName"
+        Write-LogMessage "Starting service: $serviceName"
         Start-Service -Name $serviceName
     }
 }
 
-function Enable-Services {
+function Enable-ServiceList {
     param(
         [string[]]$serviceNames
     )
     foreach ($serviceName in $serviceNames) {
-        Write-Log-Message "Enabling service: $serviceName"
+        Write-LogMessage "Enabling service: $serviceName"
         Set-Service -Name $serviceName -StartupType Automatic
     }
 }
 
-function Restart-Computer-IfNeeded {
+function Restart-ComputerIfNeeded {
     # Example usage:
     if (Get-PendingReboot) {
-        Write-Log-Message "A pending reboot was detected. Rebooting now..."
+        Write-LogMessage "A pending reboot was detected. Rebooting now..."
         Restart-Computer -Force
     }
     else {
-        Write-Log-Message "No pending reboot detected."
+        Write-LogMessage "No pending reboot detected."
     }
 }
 
@@ -202,54 +202,53 @@ function Get-PendingReboot {
     if ($pendingFileRename) {
         return $true
     }
-  
+
     # Check for Windows Update pending reboot key
     if (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired") {
         return $true
     }
-  
+
     # Check for Component Based Servicing pending reboot key
     if (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending") {
         return $true
     }
-  
+
     # No indicators found, assume no pending reboot
     return $false
 }
 
-function Wait-ForPackageManager {
+function Wait-PackageManager {
     param(
         [int]$maxWaitTime = 300
     )
     $waitTime = 0
     while ($waitTime -lt $maxWaitTime) {
-        if (-not (Check-ChocolateyInUse)) {
-            Write-Log-Message "Package manager is not in use. Proceeding with installation."
+        if (-not (Test-ChocoInUse)) {
+            Write-LogMessage "Package manager is not in use. Proceeding with installation."
             return
         }
         Start-Sleep -Seconds 5
         $waitTime += 5
     }
-    Write-Log-Message "Package manager is still in use after $maxWaitTime seconds. Exiting..."
+    Write-LogMessage "Package manager is still in use after $maxWaitTime seconds. Exiting..."
     exit 1
 }
 
-function PreInstall-Commands {
+function Invoke-CommandList {
     param(
-        [string[]]$preTasks
+        [string[]]$tasks
     )
-    foreach ($task in $preTasks) {
-        Write-Log-Message "Executing pre-task: $task"
+    foreach ($task in $tasks) {
+        Write-LogMessage "Executing task: $task"
         Invoke-Expression $task
     }
 }
 
-function PostInstall-Commands {
-    param(
-        [string[]]$postTasks
-    )
-    foreach ($task in $postTasks) {
-        Write-Log-Message "Executing post-task: $task"
-        Invoke-Expression $task
-    }
+# Always rotate log file and start lock-file
+Invoke-LogRotation -LogRotationCount 2
+New-LockFile
+
+# Trap exit and cleanup
+Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
+    try { Invoke-Cleanup } catch { Write-LogMessage "Error during cleanup: $_" }
 }
