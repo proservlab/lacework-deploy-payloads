@@ -62,7 +62,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
 
           # Install the analyzer module (already cached on runners, but safe to force)
-          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser | Out-Null
+          # Install-Module PSScriptAnalyzer -Force -Scope CurrentUser | Out-Null
 
           # Collect .ps1 files under ./windows (recursive)
           $scripts = Get-ChildItem -Path ./windows -Recurse -Filter *.ps1
