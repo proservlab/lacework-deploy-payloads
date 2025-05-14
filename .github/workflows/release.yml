@@ -1,0 +1,37 @@
+name: "Release"
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout Code"
+        uses: actions/checkout@v3
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: "Install Dependencies"
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: "Run Tests"
+        run: |
+          if [ -f pytest.ini ] || [ -d tests ]; then pytest; fi
+
+      - name: "Create GitHub Release"
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: "Release ${{ github.ref }}"
+          draft: false
+          prerelease: false
