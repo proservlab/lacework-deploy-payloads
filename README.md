@@ -14,5 +14,9 @@ Directory layout:
 
 For detailed descriptions of the scripts in each directory, see:
 
-- linux/README.md
-- windows/README.md
+- [linux/README.md](linux/README.md)
+- [windows/README.md](windows/README.md)
+
+## Contributing
+
+Each script added to this repository is required to pass either shellcheck or invoke-scriptanalyzer for shell and powershell scripts respectively. Additionally each of the scripts should have an entry in README.md. To check scripts against the pipeline test use `make lint`.
