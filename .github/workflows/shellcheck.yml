@@ -73,8 +73,8 @@ jobs:
           }
 
           # Run analyzer, only return Severity=Error
-          $results = Invoke-ScriptAnalyzer -Path $scripts.FullName.ToString() -Severity Error
-          $results | ConvertTo-Json | Out-File -FilePath scriptanalyzer.json -Encoding utf8
+          $results = Invoke-ScriptAnalyzer -Path ./windows/*.ps1 -Severity Error
+          $results | ConvertTo-Json -Depth 10 | Out-File -FilePath scriptanalyzer.json -Encoding utf8
 
           if ($results.Count -gt 0) {
               Write-Error "Invoke‑ScriptAnalyzer found $($results.Count) error(s)."
