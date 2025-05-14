@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # TEMPLATE INPUTS
 # script_name: name of the script, which will be used for the log file (e.g. /tmp/<script_name>.log)
