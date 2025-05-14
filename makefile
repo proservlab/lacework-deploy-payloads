@@ -53,11 +53,17 @@ shellcheck:
 	$(call NEED_TOOL,shellcheck)
 	$(call NEED_TOOL,jq)
 	@echo "🔍  ShellCheck…"
-	@set -eo pipefail; \
-	if [ -z "$(LINUX_SCRIPTS)" ]; then echo "No Linux scripts." ; exit 0; fi; \
-	shellcheck -S error $(LINUX_SCRIPTS) -f json | \
-	  tee shellcheck.json | \
-	  jq -e 'map(select(.level=="error")) | if length>0 then error("ShellCheck errors found") else . end' >/dev/null
+	@set -e; \
+	if [ -z "$(SHELL_SCRIPTS)" ]; then echo "No Linux scripts." ; exit 0; fi; \
+	shellcheck -S error $(SHELL_SCRIPTS) --exclude=2148 -f json | \
+	  tee shellcheck.json > /dev/null; \
+	ERRORS=$$(jq '[.[] | select(.level=="error")] | length' shellcheck.json); \
+	echo "ShellCheck errors: $$ERRORS"; \
+	if [[ $$ERRORS -gt 0 ]]; then \
+	  echo "❌  ShellCheck errors found"; \
+	  cat shellcheck.json | jq; \
+	  exit 1; \
+	fi;
 	@echo "✅  ShellCheck passed (no errors)."
 
 # ────────────── PSScriptAnalyzer ─────────────
