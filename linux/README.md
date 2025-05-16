@@ -66,5 +66,6 @@ This directory contains Bash scripts that can be executed on Linux instances via
 - **responder-port-forward.sh**: Use Responder to forward SMB/NTLM traffic.
 - **responder-reverse-shell.sh**: Reverse shell scenarios using Responder (multistage variants).
 
-## Orchestration
-- **run_me.sh**: Orchestrator to execute a sequence of payloads based on the `TAG`.
+## Testing
+- **run_me.sh**: Enumerate `ENV_CONTEXT` and load common functions.
+- **test.sh**: Load common functions and run `touch /tmp/pwned.txt.
