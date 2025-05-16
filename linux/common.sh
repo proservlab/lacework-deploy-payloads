@@ -6,15 +6,6 @@ if [ -z $MAXLOG ]; then
     MAXLOG=2
 fi
 
-# Determine Package Manager
-if command_exists "apt-get"; then
-    export PACKAGE_MANAGER="apt-get"
-    export RETRY="-o Acquire::Retries=10"
-elif command_exists "yum"; then
-    export PACKAGE_MANAGER="yum"
-    export RETRY="--setopt=retries=10"
-fi
-
 log() {
     echo `date -u +"%Y-%m-%dT%H:%M:%SZ"`" $1"
     echo `date -u +"%Y-%m-%dT%H:%M:%SZ"`" $1" >> $LOGFILE
@@ -170,6 +161,15 @@ postinstall_cmd() {
         log "Done yum pre-task";
     fi
 }
+
+# Determine Package Manager
+if command_exists "apt-get"; then
+    export PACKAGE_MANAGER="apt-get"
+    export RETRY="-o Acquire::Retries=10"
+elif command_exists "yum"; then
+    export PACKAGE_MANAGER="yum"
+    export RETRY="--setopt=retries=10"
+fi
 
 trap cleanup EXIT INT TERM
 trap cleanup SIGINT
