@@ -136,7 +136,7 @@ install_packages() {
             /bin/bash -c "$PACKAGE_MANAGER update && $PACKAGE_MANAGER install -y $packages" >> $LOGFILE 2>&1
             if [ $? -ne 0 ]; then
                 log "Failed to install some_package using $PACKAGE_MANAGER - retry required"
-                while ! check_package_manager; do
+                while ! wait_for_package_manager; do
                     RAND_WAIT=$(($RANDOM%(300-30+1)+30))
                     log "Waiting for $PACKAGE_MANAGER to be available - sleeping $RAND_WAIT"
                     sleep $RAND_WAIT
@@ -177,4 +177,4 @@ trap cleanup SIGINT
 rotate_log $MAXLOG
 lockfile
 
-export -f get_base64gzip random_sleep command_exists rotate_log cleanup lockfile log check_payload_update check_package_manager
+export -f get_base64gzip random_sleep command_exists rotate_log cleanup lockfile log check_payload_update wait_for_package_manager
