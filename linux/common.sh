@@ -19,7 +19,7 @@ lock_file() {
     log "Current process id: $CURRENT_PROCESS_ID"
     log "Current process name: $CURRENT_PROCESS"
     if [ -e "$LOCKFILE" ]; then
-        $CHECK_PID=$(cat "$LOCKFILE")
+        CHECK_PID=$(cat "$LOCKFILE")
         if ps -p $CHECK_PID > /dev/null; then
             log "LOCKCHECK: Another instance of the script is already running. Exiting..."
             exit 1
