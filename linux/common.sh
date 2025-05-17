@@ -14,17 +14,22 @@ log() {
 lock_file() {
     LOCKFILE="/tmp/payload_$TAG.lock"
     CURRENT_PROCESS_ID=$(echo $$)
-    CURRENT_PROCESS=$(ps -xwwp $CURRENT_PROCESS_ID -o args | tail -1)
+    CURRENT_PROCESS=$(ps -xwwp $CURRENT_PROCESS_ID -o args)
     # logs initially appended to current log - no log rotate before checking lock file
     log "Current process id: $CURRENT_PROCESS_ID"
     log "Current process name: $CURRENT_PROCESS"
     if [ -e "$LOCKFILE" ]; then
-        log "LOCKCHECK: Another instance of the script is already running. Exiting..."
-        exit 1
-    else
-        log "LOCKCHECK: No lock file - creating lock file"
-        mkdir -p "$(dirname "$LOCKFILE")" && touch "$LOCKFILE"
+        $CHECK_PID=$(cat "$LOCKFILE")
+        if ps -p $CHECK_PID > /dev/null; then
+            log "LOCKCHECK: Another instance of the script is already running. Exiting..."
+            exit 1
+        else
+            log "LOCKCHECK: Lock file exists but process is not running. Removing lock file."
+            rm -f "$LOCKFILE"
+        fi
     fi
+    log "LOCKCHECK: No lock file - creating lock file"
+    mkdir -p "$(dirname "$LOCKFILE")" && echo -n "$CURRENT_PROCESS_ID" > "$LOCKFILE"
 }
 
 command_exists() {
