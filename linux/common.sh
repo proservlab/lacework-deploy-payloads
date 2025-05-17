@@ -12,28 +12,17 @@ log() {
 }
 
 lockfile() {
-    if command -v yum && ! command -v ps; then
-        RETRY="--setopt=retries=10"
-        yum update $RETRY -y && yum $RETRY install -y procps
-    fi
-
     LOCKFILE="/tmp/payload_$TAG.lock"
-    CURRENT_PROCESS=$(echo $$)
-    PROCESSES=$(pgrep -f "\| tee /tmp/payload_$TAG \| base64 -d \| gunzip")
-    PROCESS_NAMES=$(echo -n $TAG | xargs --no-run-if-empty ps fp)
-    COUNT=$(pgrep -f "\| tee /tmp/payload_$TAG \| base64 -d \| gunzip" | wc -l)
+    CURRENT_PROCESS_ID=$(echo $$)
+    CURRENT_PROCESS=$(ps -xwwp $CURRENT_PROCESS_ID -o args | tail -1)
     # logs initially appended to current log - no log rotate before checking lock file
-    log "Lock pids: $PROCESSES"
-    log "Lock process names: $PROCESS_NAMES"
-    log "Lock process count: $COUNT"
-    if [ -e "$LOCKFILE" ] && [ $COUNT -gt 1 ]; then
+    log "Current process id: $CURRENT_PROCESS_ID"
+    log "Current process name: $CURRENT_PROCESS"
+    if [ -e "$LOCKFILE" ]; then
         log "LOCKCHECK: Another instance of the script is already running. Exiting..."
         exit 1
-    elif [ -e "$LOCKFILE" ] && [ $COUNT -eq 1 ]; then
-        log "LOCKCHECK: Lock file with no running process found - updating lock file time and starting process"
-        touch "$LOCKFILE"
     else
-        log "LOCKCHECK: No lock file and no running process found - creating lock file"
+        log "LOCKCHECK: No lock file - creating lock file"
         mkdir -p "$(dirname "$LOCKFILE")" && touch "$LOCKFILE"
     fi
 }
