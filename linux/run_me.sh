@@ -13,15 +13,16 @@ elif command -v "yum" >/dev/null 2>&1; then
 fi
 
 echo "running: $PACKAGE_MANAGER update && $PACKAGE_MANAGER install -y curl jq openssl procps"
-$PACKAGE_MANAGER update && $PACKAGE_MANAGER install -y curl jq openssl procps apt-utils
+$PACKAGE_MANAGER update >/dev/null 2>&1 || true 
+$PACKAGE_MANAGER install -y curl jq openssl procps >/dev/null 2>&1 || true
 
 URL="https://raw.githubusercontent.com/proservlab/lacework-deploy-payloads/main/linux/common.sh"
 FUNC=$(mktemp)
 curl -LJ -s $URL -o $FUNC
 # make the function available in the current shell
 if [ $? -ne 0 ]; then
-    echo "Failed to download the function. Exiting."
-    exit 1
+    json=$(printf '{"session_id": "%s", "task": "%s", "stdout": "", "stderr": "%s", "returncode": %d}\n' "$SESSION_ID", "$TASK", "Failed to download common.sh functions","1"); 
+    echo $json 1>&2;
 fi
 
 chmod +x $FUNC
