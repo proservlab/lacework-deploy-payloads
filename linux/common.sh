@@ -168,4 +168,4 @@ install_packages "jq curl procps"
 rotate_log $MAXLOG
 lock_file
 
-export -f get_base64gzip random_sleep command_exists rotate_log cleanup lockfile log check_payload_update wait_for_package_manager
+export -f get_base64gzip random_sleep command_exists rotate_log cleanup lock_file log check_payload_update wait_for_package_manager
