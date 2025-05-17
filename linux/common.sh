@@ -14,10 +14,8 @@ log() {
 lock_file() {
     LOCKFILE="/tmp/payload_$TAG.lock"
     CURRENT_PROCESS_ID=$(echo $$)
-    CURRENT_PROCESS=$(ps -xwwp $CURRENT_PROCESS_ID -o args)
     # logs initially appended to current log - no log rotate before checking lock file
     log "Current process id: $CURRENT_PROCESS_ID"
-    log "Current process name: $CURRENT_PROCESS"
     if [ -e "$LOCKFILE" ]; then
         CHECK_PID=$(cat "$LOCKFILE")
         if ps -p $CHECK_PID > /dev/null; then
