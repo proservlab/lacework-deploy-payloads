@@ -31,14 +31,7 @@ chmod +x $FUNC
 # Main script starts here
 ################################################################################
 
-# check if the script is running and exit via managed lock file
-lock_file
-
-# rotate the log file $LOGFILE
-rotate_log 2
-
 # start a random sleep to avoid multiple executions at the same time
-# this is a random sleep between 30 and 300 seconds
 log "Starting random sleep"
 random_sleep 300
 

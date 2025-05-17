@@ -11,7 +11,7 @@ log() {
     echo `date -u +"%Y-%m-%dT%H:%M:%SZ"`" $1" >> $LOGFILE
 }
 
-lockfile() {
+lock_file() {
     LOCKFILE="/tmp/payload_$TAG.lock"
     CURRENT_PROCESS_ID=$(echo $$)
     CURRENT_PROCESS=$(ps -xwwp $CURRENT_PROCESS_ID -o args | tail -1)
@@ -166,6 +166,6 @@ trap cleanup SIGINT
 install_packages "jq curl procps"
 
 rotate_log $MAXLOG
-lockfile
+lock_file
 
 export -f get_base64gzip random_sleep command_exists rotate_log cleanup lockfile log check_payload_update wait_for_package_manager
