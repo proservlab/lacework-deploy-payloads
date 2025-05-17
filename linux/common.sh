@@ -174,6 +174,8 @@ fi
 trap cleanup EXIT INT TERM
 trap cleanup SIGINT
 
+install_packages "jq curl procps"
+
 rotate_log $MAXLOG
 lockfile
 
