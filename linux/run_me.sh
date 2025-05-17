@@ -13,7 +13,7 @@ elif command -v "yum" >/dev/null 2>&1; then
 fi
 
 echo "running: $PACKAGE_MANAGER update && $PACKAGE_MANAGER install -y curl jq openssl procps"
-$PACKAGE_MANAGER update && $PACKAGE_MANAGER install -y curl jq openssl procps
+$PACKAGE_MANAGER update && $PACKAGE_MANAGER install -y curl jq openssl procps apt-utils
 
 URL="https://raw.githubusercontent.com/proservlab/lacework-deploy-payloads/main/linux/common.sh"
 FUNC=$(mktemp)
