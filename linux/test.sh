@@ -33,3 +33,6 @@ chmod +x $FUNC
 ################################################################################
 
 touch /tmp/pwned
+
+# generate an error
+command_not_found
