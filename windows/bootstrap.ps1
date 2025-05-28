@@ -1,3 +1,8 @@
+param (
+    [switch] $EnableSSH,                    # ‑EnableSSH to install & configure OpenSSH
+    [string] $PublicKeyOpenSSH,             # your public key in OpenSSH format
+    [string] $InstanceName                  # computer name to set; omit to keep current name
+)
 function Invoke-PostSysprep {
     [CmdletBinding()]
     param (
@@ -16,31 +21,37 @@ function Invoke-PostSysprep {
     try {
         & $log 'Start'
 
-        # ---------- OpenSSH setup ----------
-        & $log 'Enabling OpenSSH Server'
-        if (-not (Get-WindowsCapability -Online |
-                    Where-Object Name  -like 'OpenSSH.Server*' |
-                    Where-Object State -eq   'Installed')) {
+        # ---------- Optional OpenSSH setup ----------
+        if ($EnableSSH) {
+            & $log 'Enabling OpenSSH Server'
+            if (-not (Get-WindowsCapability -Online |
+                        Where-Object Name  -like 'OpenSSH.Server*' |
+                        Where-Object State -eq   'Installed')) {
 
-            Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0'
+                Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0'
+            }
+
+            & $log 'Setting OpenSSH service to automatic'
+            sc.exe config sshd start=auto | Out-Null
+            Set-ItemProperty -Path 'HKLM:\SOFTWARE\OpenSSH' `
+                                -Name DefaultShell `
+                                -Value 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe' `
+                                -Force
+
+            if ($PublicKeyOpenSSH) {
+                & $log 'Setting public key for OpenSSH'
+                $keyPath = 'C:\ProgramData\ssh\administrators_authorized_keys'
+                $PublicKeyOpenSSH | Out-File $keyPath -Encoding utf8 -Append
+                icacls $keyPath /inheritance:r `
+                                /grant 'Administrators:F' 'SYSTEM:F' | Out-Null
+            }else{
+                & $log 'No public key provided for OpenSSH'
+            }
+            & $log 'Starting OpenSSH service'
+            sc.exe start sshd | Out-Null
+        }else{
+            & $log 'OpenSSH Server not enabled'
         }
-
-        & $log 'Setting OpenSSH service to automatic'
-        sc.exe config sshd start=auto | Out-Null
-        Set-ItemProperty -Path 'HKLM:\SOFTWARE\OpenSSH' `
-                            -Name DefaultShell `
-                            -Value 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe' `
-                            -Force
-
-        if ($PublicKeyOpenSSH) {
-            & $log 'Setting public key for OpenSSH'
-            $keyPath = 'C:\ProgramData\ssh\administrators_authorized_keys'
-            $PublicKeyOpenSSH | Out-File $keyPath -Encoding utf8 -Append
-            icacls $keyPath /inheritance:r `
-                            /grant 'Administrators:F' 'SYSTEM:F' | Out-Null
-        }
-        & $log 'Starting OpenSSH service'
-        sc.exe start sshd | Out-Null
         # ---------- End OpenSSH setup ----------
 
         # Install Chocolatey (abbreviated -UseB == -UseBasicParsing)
