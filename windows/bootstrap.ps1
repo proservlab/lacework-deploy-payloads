@@ -1,13 +1,13 @@
 param (
     [switch] $EnableSSH,                    # ‑EnableSSH to install & configure OpenSSH
-    [string] $PublicKeyOpenSSH,             # your public key in OpenSSH format
+    [string] $PublicKeyOpenSSHBase64,             # your public key in OpenSSH format
     [string] $InstanceName                  # computer name to set; omit to keep current name
 )
 function Invoke-PostSysprep {
     [CmdletBinding()]
     param (
         [switch] $EnableSSH,                    # ‑EnableSSH to install & configure OpenSSH
-        [string] $PublicKeyOpenSSH,             # your public key in OpenSSH format
+        [string] $PublicKeyOpenSSHBase64,             # your public key in OpenSSH format
         [string] $InstanceName                  # computer name to set; omit to keep current name
     )
 
@@ -38,10 +38,10 @@ function Invoke-PostSysprep {
                                 -Value 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe' `
                                 -Force
 
-            if ($PublicKeyOpenSSH) {
+            if ($PublicKeyOpenSSHBase64) {
                 & $log 'Setting public key for OpenSSH'
                 $keyPath = 'C:\ProgramData\ssh\administrators_authorized_keys'
-                $PublicKeyOpenSSH | Out-File $keyPath -Encoding utf8 -Append
+                [Convert]::FromBase64String($PublicKeyOpenSSHBase64) | Out-File $keyPath -Encoding utf8 -Append
                 icacls $keyPath /inheritance:r `
                                 /grant 'Administrators:F' 'SYSTEM:F' | Out-Null
             }else{
