@@ -41,9 +41,8 @@ function Invoke-PostSysprep {
             if ($PublicKeyOpenSSHBase64) {
                 & $log 'Setting public key for OpenSSH'
                 $keyPath = 'C:\ProgramData\ssh\administrators_authorized_keys'
-                [Convert]::FromBase64String($PublicKeyOpenSSHBase64) | Out-File $keyPath -Encoding utf8 -Append
-                icacls $keyPath /inheritance:r `
-                                /grant 'Administrators:F' 'SYSTEM:F' | Out-Null
+                [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($PublicKeyOpenSSHBase64)) | Out-File $keyPath -Encoding UTF8
+                icacls.exe $keyPath /inheritance:r /grant 'Administrators:F' /grant 'SYSTEM:F'
             }else{
                 & $log 'No public key provided for OpenSSH'
             }
