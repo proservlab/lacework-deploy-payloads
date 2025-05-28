@@ -5,6 +5,9 @@ This directory contains PowerShell scripts that can be executed on Windows insta
 ## Shared Utilities
 - **common.ps1**: Shared functions and helpers (logging, locking, random sleep, payload decoding).
 
+## Bootstrap
+- **bootstrap.ps1**: Post sysprep script to setup windows in azure, gcp and aws.
+
 ## Deployment Scripts
 - **deploy_docker.ps1**: Install Docker (Docker CE/desktop) and start the service.
 - **deploy_git.ps1**: Install Git.
