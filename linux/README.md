@@ -13,6 +13,7 @@ This directory contains Bash scripts that can be executed on Linux instances via
 - **connect-reverse-shell.sh**: Establish a reverse shell back to a listener.
 - **connect-ssh-shell-multistage.sh**: Multi-stage SSH shell via piped payloads.
 - **connect-ssh-shell-multistage_scan.sh**: Multi-stage SSH shell with scanning.
+- **connect-ssh-lateral-movement.sh**: Scan local system for private keys and the attempt to connect to hosts in the same subnet using the discovered keys.
 
 ## Deployment Scripts
 - **deploy-aws-cli.sh**: Install and configure the AWS CLI.
