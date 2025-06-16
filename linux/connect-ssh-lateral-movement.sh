@@ -17,7 +17,7 @@ SUCCESSFUL_CONNECTIONS=()
 ##############################################################################
 # Behaviour on successful login
 ##############################################################################
-COMMANDS=("whoami" "uname -a")   # commands to push, in order
+COMMANDS=("whoami" "uname -a" "touch /tmp/lateral_pwned.txt")   # commands to push, in order
 COMMAND_DELAY=2                  # seconds to wait between pushes
 KEEP_SESSION_OPEN=false          # true = leave SSH alive after commands
 
