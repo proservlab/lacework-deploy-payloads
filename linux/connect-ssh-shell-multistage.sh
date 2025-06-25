@@ -205,7 +205,7 @@ else
     python3.9 get-pip.py >> $LOGFILE 2>&1
     log "wait before using module..."
     sleep 5
-    python3.9 -m pip install -U pip "packaging>=24" "ordered-set>=3.1.1" "more_itertools>=8.8" "jaraco.text>=3.7" "importlib_resources>=5.10.2" "importlib_metadata>=6" "tomli>=2.0.1" "wheel>=0.43.0" "platformdirs>=2.6.2" setuptools wheel setuptools_rust netifaces jinja2 jc >> $LOGFILE 2>&1
+    python3.9 -m pip install -U pip "packaging>=24" "ordered-set>=3.1.1" "more_itertools>=8.8" "jaraco.text>=3.7" "importlib_resources>=5.10.2" "importlib_metadata>=6" "tomli>=2.0.1" "wheel>=0.43.0" "platformdirs>=2.6.2" setuptools wheel setuptools_rust netifaces==0.11.0 jinja2 jc >> $LOGFILE 2>&1
     python3.9 -m pip install -U pwncat-cs >> $LOGFILE 2>&1
     log "wait before using module..."
     sleep 5
