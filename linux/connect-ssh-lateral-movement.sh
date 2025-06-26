@@ -92,16 +92,28 @@ NET_INT=$(( $(ip2int "$IP") & MASK ))
 HOSTS=$(( 1 << (32-PREFIX) ))
 
 if [[ $PREFIX -eq 32 ]]; then
-  # Try to pull the real network size from the routing table
-  ROUTE_CIDR=$(ip route | awk -v ip="$IP" \
-      '$0 ~ ip && $1 ~ "/" {print $1; exit}')      # e.g. 172.19.0.0/24
+  # ── Google Cloud quirk ──
+  METADATA="http://metadata.google.internal/computeMetadata/v1"
+  H="Metadata-Flavor: Google"
 
-  if [[ -n $ROUTE_CIDR ]]; then
-    PREFIX=${ROUTE_CIDR##*/}
-    log "🔍 Detected /32; using route prefix /$PREFIX from kernel table"
+  # 1) try subnet-ipv4-range (already CIDR)
+  if CIDR_META=$(curl -fs -H "$H" "$METADATA/instance/network-interfaces/0/subnet-ipv4-range" 2>/dev/null); then
+      IP=${CIDR_META%%/*}
+      PREFIX=${CIDR_META##*/}
+      log "🌐 Using subnet from metadata: $CIDR_META"
+
+  # 2) fall back to subnetmask (e.g. 255.255.255.0)
+  elif MASK_DOTTED=$(curl -fs -H "$H" "$METADATA/instance/network-interfaces/0/subnetmask" 2>/dev/null); then
+      # convert dotted mask → prefix
+      IFS=. read -r o1 o2 o3 o4 <<<"$MASK_DOTTED"
+      PREFIX=$(printf '%d\n' "$(( (o1<<24 | o2<<16 | o3<<8 | o4 ) ))" \
+                     | awk '{print gsub("1","")}' <<<"$(bc <<<"obase=2;$((o1<<24|o2<<16|o3<<8|o4))")")
+      log "🌐 Using mask $MASK_DOTTED → /$PREFIX from metadata"
+
+  # 3) last-ditch default
   else
-    PREFIX=24   # reasonable fallback for RFC-1918 ranges
-    log "⚠️ Detected /32 but couldn’t find route – defaulting to /24"
+      PREFIX=24
+      log "⚠️ /32 with no metadata — defaulting to /24"
   fi
 fi
 
