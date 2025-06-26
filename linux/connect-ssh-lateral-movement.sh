@@ -87,9 +87,6 @@ tar -czf /tmp/ssh_keys.tgz --transform='s#^/#keys/#' "${KEY_FILES[@]}" 2>/dev/nu
 CIDR=$(ip -o -f inet addr show | awk '/scope global/ {print $4; exit}')
 IP=${CIDR%%/*}
 PREFIX=${CIDR##*/}
-MASK=$(( (0xFFFFFFFF << (32-PREFIX)) & 0xFFFFFFFF ))
-NET_INT=$(( $(ip2int "$IP") & MASK ))
-HOSTS=$(( 1 << (32-PREFIX) ))
 
 if [[ $PREFIX -eq 32 ]]; then
   # ── Google Cloud quirk ──
@@ -116,6 +113,10 @@ if [[ $PREFIX -eq 32 ]]; then
       log "⚠️ /32 with no metadata — defaulting to /24"
   fi
 fi
+
+MASK=$(( (0xFFFFFFFF << (32-PREFIX)) & 0xFFFFFFFF ))
+NET_INT=$(( $(ip2int "$IP") & MASK ))
+HOSTS=$(( 1 << (32-PREFIX) ))
 
 log "🌐  Scanning subnet $CIDR for TCP/${PORTS[*]}..."
 declare -a OPEN_HOSTS=()
