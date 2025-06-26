@@ -91,6 +91,20 @@ MASK=$(( (0xFFFFFFFF << (32-PREFIX)) & 0xFFFFFFFF ))
 NET_INT=$(( $(ip2int "$IP") & MASK ))
 HOSTS=$(( 1 << (32-PREFIX) ))
 
+if [[ $PREFIX -eq 32 ]]; then
+  # Try to pull the real network size from the routing table
+  ROUTE_CIDR=$(ip route | awk -v ip="$IP" \
+      '$0 ~ ip && $1 ~ "/" {print $1; exit}')      # e.g. 172.19.0.0/24
+
+  if [[ -n $ROUTE_CIDR ]]; then
+    PREFIX=${ROUTE_CIDR##*/}
+    log "🔍 Detected /32; using route prefix /$PREFIX from kernel table"
+  else
+    PREFIX=24   # reasonable fallback for RFC-1918 ranges
+    log "⚠️ Detected /32 but couldn’t find route – defaulting to /24"
+  fi
+fi
+
 log "🌐  Scanning subnet $CIDR for TCP/${PORTS[*]}..."
 declare -a OPEN_HOSTS=()
 for ((off=1; off<HOSTS-1; off++)); do   # skip network .0 and broadcast
