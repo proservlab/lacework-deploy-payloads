@@ -1,12 +1,12 @@
 # ──────────────────────────────────────────────
-# Makefile – local lint helpers
+# Makefile - local lint helpers
 #
 # Targets
-#   make deps      – interactively install required tools
+#   make deps      - interactively install required tools
 #   make shellcheck
 #   make pssa
 #   make readme
-#   make lint      – run everything (default)
+#   make lint      - run everything (default)
 # ──────────────────────────────────────────────
 
 SHELL   := /usr/bin/env bash

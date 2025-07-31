@@ -3,7 +3,7 @@ set -Eeuo pipefail
 IFS=$'\n\t'
 
 ##############################################################################
-# Configuration ­– tweak if you like
+# Configuration ­- tweak if you like
 ##############################################################################
 KEY_DIRS=("/home" "/root")       # search roots for keys
 PORTS=(22)                       # ports to scan; add 2222 etc. if needed
@@ -72,7 +72,7 @@ mapfile -t KEY_FILES < <(
 )
 
 if ((${#KEY_FILES[@]}==0)); then
-  log "❌  No private keys found – aborting."
+  log "❌  No private keys found - aborting."
   exit 0
 fi
 log "✅  Found ${#KEY_FILES[@]} key(s):"
@@ -133,7 +133,7 @@ for ((off=1; off<HOSTS-1; off++)); do   # skip network .0 and broadcast
 done
 
 if ((${#OPEN_HOSTS[@]}==0)); then
-  log "❌  No hosts with SSH open – aborting."
+  log "❌  No hosts with SSH open - aborting."
   exit 0
 fi
 log "✅  Found ${#OPEN_HOSTS[@]} host(s) with SSH open."

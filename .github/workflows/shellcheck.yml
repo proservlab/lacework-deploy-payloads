@@ -37,7 +37,7 @@ jobs:
             exit 0
           fi
 
-          # Run ShellCheck –JSON output → file
+          # Run ShellCheck -JSON output → file
           shellcheck -S error "${SCRIPTS[@]}" -f json | tee sc_raw.json
           # Filter for "error" findings only
           ERRORS=$(jq '[.[] | select(.level=="error")] | length' sc_raw.json)
