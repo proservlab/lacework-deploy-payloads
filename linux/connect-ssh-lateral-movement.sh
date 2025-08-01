@@ -153,7 +153,7 @@ for host in "${OPEN_HOSTS[@]}"; do
     if [[ $key == /home/*/.ssh/* ]]; then            #  /home/<user>/.ssh/<file>
         user_guess=${key#/home/}                     # strip leading “/home/”
         user_guess=${user_guess%%/*}                 # keep text up to first /
-    elif [[ $key == /root/* ]]; then                 #  /root/…
+    elif [[ $key == /root/* ]]; then                 #  /root/...
         user_guess=root
     else                                             # fall back to filename heuristics
         user_guess=$(basename "$key")                # e.g.  id_rsa_ec2-user
